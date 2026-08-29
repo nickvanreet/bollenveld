@@ -227,6 +227,15 @@ details li b{color:var(--chalk)}
   </div>
 
   <div class="sec">
+    <div class="sec-h"><span>✨ Ontwerp voor mij</span></div>
+    <div class="pal-h">Stijl</div><div class="scrub seg" id="gen-stijl"></div>
+    <div class="pal-h">Prioriteit</div><div class="scrub seg" id="gen-prio"></div>
+    <div class="pal-h">Kleuren</div><div class="scrub seg" id="gen-kleur"></div>
+    <button class="btn" id="gen-btn" style="margin-top:10px">Genereer ontwerp</button>
+    <div class="hint">Elke klik geeft een nieuwe variant binnen je keuzes — daarna vrij bijtekenen met de penselen.</div>
+  </div>
+
+  <div class="sec">
     <div class="sec-h"><span>Voorbeelden — laden en vrij bijtekenen</span></div>
     <div class="scrub" id="vbrow"></div>
   </div>
@@ -286,6 +295,10 @@ details li b{color:var(--chalk)}
   <button class="btn" id="copy">Kopieer bestellijst</button>
   <button class="btn ghost" id="reset-qty">Zet terug op adviesaantallen</button>
   <button class="btn ghost" id="leeg-lijst">Maak de lijst leeg</button>
+  <details class="sec" style="margin-top:14px">
+    <summary>Plantkalender</summary>
+    <div id="plantkal" style="margin-top:6px"></div>
+  </details>
   <div class="hint">Sneeuwklokjes zijn een aparte bestelling in januari — De Warande verzendt "in het groen" vanaf begin februari. Tulpen pas in november planten (koelere grond remt tulpenvuur en muizenvraat).</div>
 </section>
 
@@ -296,27 +309,27 @@ details li b{color:var(--chalk)}
 <script>
 /* dens = advies-plantdichtheid st/m² bij verwildering; hex = rasterkleur */
 const SPECIES=[
- {id:"gal",naam:"Sneeuwklokje",lat:"Galanthus nivalis",wiki:"Galanthus_nivalis",n:300,unit:0.235,step:50,bloei:[1,2],diep:8,afst:8,dens:80,kleur:"var(--wit)",hex:"#E8E3D5",sup:"jan",rate:300,note:"Kopen als 'in het groen' — plant in polletjes van 3–5."},
- {id:"era",naam:"Winterakoniet",lat:"Eranthis hyemalis",wiki:"Eranthis_hyemalis",n:150,unit:0.235,step:50,bloei:[1,2,3],diep:5,afst:8,dens:60,kleur:"var(--geel)",hex:"#EFC94C",sup:"war",rate:200,note:"Knolletjes 24u voorweken vóór het planten."},
- {id:"cro",naam:"Boerenkrokus",lat:"Crocus tommasinianus",wiki:"Crocus_tommasinianus",n:400,unit:0.14,step:50,bloei:[2,3],diep:8,afst:8,dens:80,kleur:"var(--paars)",hex:"#9B7FE0",sup:"war",rate:200},
- {id:"iri",naam:"Netiris",lat:"Iris reticulata",wiki:"Iris_reticulata",n:100,unit:0.18,step:25,bloei:[2,3],diep:9,afst:10,dens:60,kleur:"var(--blauw)",hex:"#5B8DD9",sup:"bul",rate:200,note:"Droogste plek, scherp zand eronder."},
- {id:"nar",naam:"Narcis",lat:"Narcissus, vroeg + laat",wiki:"Narcissus_(plant)",n:200,unit:0.33,step:50,bloei:[3,4],diep:14,afst:12,dens:35,kleur:"var(--geel)",hex:"#F5D976",sup:"war",rate:120},
- {id:"mus",naam:"Blauwe druifjes",lat:"Muscari armeniacum",wiki:"Muscari_armeniacum",n:250,unit:0.12,step:50,bloei:[4,5],diep:8,afst:8,dens:60,kleur:"var(--blauw)",hex:"#7FA8E0",sup:"war",rate:200},
- {id:"tul",naam:"Tulp",lat:"Tulipa, vroeg/Triumph/laat",wiki:"Tulip",n:250,unit:0.32,step:50,bloei:[4,5],diep:14,afst:12,dens:45,kleur:"var(--roze)",hex:"#E08AAE",sup:"bul",rate:120,note:"Scherp zand onder de bol; komt in zandleem 2–3 jaar terug."},
- {id:"bos",naam:"Boshyacint",lat:"Hyacinthoides non-scripta",wiki:"Hyacinthoides_non-scripta",n:150,unit:0.34,step:25,bloei:[4,5],diep:10,afst:10,dens:40,kleur:"var(--paars)",hex:"#8A6FD1",sup:"eco",rate:200,note:"Echte non-scripta — geen Spaanse hispanica."},
- {id:"aps",naam:"Sierui",lat:"Allium 'Purple Sensation'",wiki:"Allium_hollandicum",n:80,unit:0.56,step:10,bloei:[5,6],diep:12,afst:20,dens:12,kleur:"var(--paars)",hex:"#B07FE0",sup:"bul",rate:120},
- {id:"cam",naam:"Camassia",lat:"Camassia leichtlinii",wiki:"Camassia",n:60,unit:0.92,step:10,bloei:[5,6],diep:12,afst:20,dens:15,kleur:"var(--blauw)",hex:"#6F9FD8",sup:"war",rate:120,note:"In het laagste, natste punt — verdraagt dat als enige."},
- {id:"asp",naam:"Trommelstokjes",lat:"Allium sphaerocephalon",wiki:"Allium_sphaerocephalon",n:100,unit:0.15,step:25,bloei:[6,7],diep:8,afst:8,dens:40,kleur:"var(--roze)",hex:"#C46A8A",sup:"war",rate:200},
+ {id:"gal",kleurNaam:"wit",hoogte:12,verw:5,naam:"Sneeuwklokje",lat:"Galanthus nivalis",wiki:"Galanthus_nivalis",n:300,unit:0.235,step:50,bloei:[1,2],diep:8,afst:8,dens:80,kleur:"var(--wit)",hex:"#E8E3D5",sup:"jan",rate:300,note:"Kopen als 'in het groen' — plant in polletjes van 3–5."},
+ {id:"era",kleurNaam:"geel",hoogte:8,verw:5,naam:"Winterakoniet",lat:"Eranthis hyemalis",wiki:"Eranthis_hyemalis",n:150,unit:0.235,step:50,bloei:[1,2,3],diep:5,afst:8,dens:60,kleur:"var(--geel)",hex:"#EFC94C",sup:"war",rate:200,note:"Knolletjes 24u voorweken vóór het planten."},
+ {id:"cro",kleurNaam:"paars",hoogte:10,verw:5,naam:"Boerenkrokus",lat:"Crocus tommasinianus",wiki:"Crocus_tommasinianus",n:400,unit:0.14,step:50,bloei:[2,3],diep:8,afst:8,dens:80,kleur:"var(--paars)",hex:"#9B7FE0",sup:"war",rate:200},
+ {id:"iri",kleurNaam:"blauw",hoogte:12,verw:3,naam:"Netiris",lat:"Iris reticulata",wiki:"Iris_reticulata",n:100,unit:0.18,step:25,bloei:[2,3],diep:9,afst:10,dens:60,kleur:"var(--blauw)",hex:"#5B8DD9",sup:"bul",rate:200,note:"Droogste plek, scherp zand eronder."},
+ {id:"nar",kleurNaam:"geel",hoogte:35,verw:4,naam:"Narcis",lat:"Narcissus, vroeg + laat",wiki:"Narcissus_(plant)",n:200,unit:0.33,step:50,bloei:[3,4],diep:14,afst:12,dens:35,kleur:"var(--geel)",hex:"#F5D976",sup:"war",rate:120},
+ {id:"mus",kleurNaam:"blauw",hoogte:15,verw:4,naam:"Blauwe druifjes",lat:"Muscari armeniacum",wiki:"Muscari_armeniacum",n:250,unit:0.12,step:50,bloei:[4,5],diep:8,afst:8,dens:60,kleur:"var(--blauw)",hex:"#7FA8E0",sup:"war",rate:200},
+ {id:"tul",kleurNaam:"gemengd",hoogte:45,verw:2,naam:"Tulp",lat:"Tulipa, vroeg/Triumph/laat",wiki:"Tulip",n:250,unit:0.32,step:50,bloei:[4,5],diep:14,afst:12,dens:45,kleur:"var(--roze)",hex:"#E08AAE",sup:"bul",rate:120,note:"Scherp zand onder de bol; komt in zandleem 2–3 jaar terug."},
+ {id:"bos",kleurNaam:"paars",hoogte:30,verw:4,naam:"Boshyacint",lat:"Hyacinthoides non-scripta",wiki:"Hyacinthoides_non-scripta",n:150,unit:0.34,step:25,bloei:[4,5],diep:10,afst:10,dens:40,kleur:"var(--paars)",hex:"#8A6FD1",sup:"eco",rate:200,note:"Echte non-scripta — geen Spaanse hispanica."},
+ {id:"aps",kleurNaam:"paars",hoogte:80,verw:3,naam:"Sierui",lat:"Allium 'Purple Sensation'",wiki:"Allium_hollandicum",n:80,unit:0.56,step:10,bloei:[5,6],diep:12,afst:20,dens:12,kleur:"var(--paars)",hex:"#B07FE0",sup:"bul",rate:120},
+ {id:"cam",kleurNaam:"blauw",hoogte:70,verw:4,naam:"Camassia",lat:"Camassia leichtlinii",wiki:"Camassia",n:60,unit:0.92,step:10,bloei:[5,6],diep:12,afst:20,dens:15,kleur:"var(--blauw)",hex:"#6F9FD8",sup:"war",rate:120,note:"In het laagste, natste punt — verdraagt dat als enige."},
+ {id:"asp",kleurNaam:"paars",hoogte:60,verw:4,naam:"Trommelstokjes",lat:"Allium sphaerocephalon",wiki:"Allium_sphaerocephalon",n:100,unit:0.15,step:25,bloei:[6,7],diep:8,afst:8,dens:40,kleur:"var(--roze)",hex:"#C46A8A",sup:"war",rate:200},
  /* alternatieven — alt:true, komen pas mee als je ze toevoegt */
- {id:"chi",alt:true,naam:"Sneeuwroem",lat:"Chionodoxa forbesii",wiki:"Scilla_forbesii",n:150,unit:0.12,step:50,bloei:[2,3],diep:8,afst:8,dens:70,kleur:"var(--blauw)",hex:"#A8C4F0",sup:"war",rate:200,note:"Verwildert even hard als krokus; blauw met wit hart."},
- {id:"sci",alt:true,naam:"Oosterse sterhyacint",lat:"Scilla siberica",wiki:"Scilla_siberica",n:150,unit:0.13,step:50,bloei:[3,4],diep:8,afst:8,dens:70,kleur:"var(--blauw)",hex:"#6FA8E8",sup:"war",rate:200,note:"Fel kobaltblauw, zelfzaaier."},
- {id:"ane",alt:true,naam:"Blauwe anemoon",lat:"Anemone blanda",wiki:"Anemonoides_blanda",n:100,unit:0.18,step:25,bloei:[3,4],diep:5,afst:10,dens:50,kleur:"var(--paars)",hex:"#D8C4F0",sup:"war",rate:200,note:"Knolletjes 24u voorweken, net als akoniet."},
- {id:"pus",alt:true,naam:"Kegelbloem",lat:"Puschkinia scilloides",wiki:"Puschkinia_scilloides",n:150,unit:0.12,step:50,bloei:[3,4],diep:8,afst:8,dens:70,kleur:"var(--wit)",hex:"#C8D8F0",sup:"war",rate:200},
- {id:"fri",alt:true,naam:"Kievitsbloem",lat:"Fritillaria meleagris",wiki:"Fritillaria_meleagris",n:75,unit:0.35,step:25,bloei:[4,5],diep:8,afst:10,dens:35,kleur:"var(--roze)",hex:"#B06A9A",sup:"eco",rate:200,note:"Wil het juist nát — perfect naast camassia in de kom. Inheems, geschaakt patroon."},
- {id:"tcl",alt:true,naam:"Botanische tulp",lat:"Tulipa clusiana",wiki:"Tulipa_clusiana",n:100,unit:0.30,step:25,bloei:[4],diep:10,afst:10,dens:50,kleur:"var(--roze)",hex:"#E8A0B8",sup:"bul",rate:200,note:"Dé tulp die in Vlaamse grond wél jaren terugkomt."},
- {id:"leu",alt:true,naam:"Zomerklokje",lat:"Leucojum aestivum",wiki:"Leucojum_aestivum",n:50,unit:0.60,step:10,bloei:[4,5],diep:10,afst:15,dens:25,kleur:"var(--wit)",hex:"#EDEDE0",sup:"eco",rate:120,note:"Groot sneeuwklokje voor natte plekken; bloeit laat."},
- {id:"npo",alt:true,naam:"Dichtersnarcis",lat:"Narcissus poeticus recurvus",wiki:"Narcissus_poeticus",n:100,unit:0.35,step:25,bloei:[5],diep:14,afst:12,dens:30,kleur:"var(--wit)",hex:"#F0E8D0",sup:"war",rate:120,note:"De laatste en meest geurende narcis — rekt narcisseizoen tot mei."},
- {id:"nec",alt:true,naam:"Honinglook",lat:"Nectaroscordum siculum",wiki:"Allium_siculum",n:50,unit:0.55,step:10,bloei:[5,6],diep:12,afst:15,dens:15,kleur:"var(--paars)",hex:"#C4A8D8",sup:"bul",rate:120,note:"Hangende klokjes, hommelmagneet, zelfzaaier."}
+ {id:"chi",kleurNaam:"blauw",hoogte:12,verw:5,alt:true,naam:"Sneeuwroem",lat:"Chionodoxa forbesii",wiki:"Scilla_forbesii",n:150,unit:0.12,step:50,bloei:[2,3],diep:8,afst:8,dens:70,kleur:"var(--blauw)",hex:"#A8C4F0",sup:"war",rate:200,note:"Verwildert even hard als krokus; blauw met wit hart."},
+ {id:"sci",kleurNaam:"blauw",hoogte:12,verw:5,alt:true,naam:"Oosterse sterhyacint",lat:"Scilla siberica",wiki:"Scilla_siberica",n:150,unit:0.13,step:50,bloei:[3,4],diep:8,afst:8,dens:70,kleur:"var(--blauw)",hex:"#6FA8E8",sup:"war",rate:200,note:"Fel kobaltblauw, zelfzaaier."},
+ {id:"ane",kleurNaam:"paars",hoogte:10,verw:4,alt:true,naam:"Blauwe anemoon",lat:"Anemone blanda",wiki:"Anemonoides_blanda",n:100,unit:0.18,step:25,bloei:[3,4],diep:5,afst:10,dens:50,kleur:"var(--paars)",hex:"#D8C4F0",sup:"war",rate:200,note:"Knolletjes 24u voorweken, net als akoniet."},
+ {id:"pus",kleurNaam:"wit",hoogte:12,verw:4,alt:true,naam:"Kegelbloem",lat:"Puschkinia scilloides",wiki:"Puschkinia_scilloides",n:150,unit:0.12,step:50,bloei:[3,4],diep:8,afst:8,dens:70,kleur:"var(--wit)",hex:"#C8D8F0",sup:"war",rate:200},
+ {id:"fri",kleurNaam:"paars",hoogte:25,verw:4,alt:true,naam:"Kievitsbloem",lat:"Fritillaria meleagris",wiki:"Fritillaria_meleagris",n:75,unit:0.35,step:25,bloei:[4,5],diep:8,afst:10,dens:35,kleur:"var(--roze)",hex:"#B06A9A",sup:"eco",rate:200,note:"Wil het juist nát — perfect naast camassia in de kom. Inheems, geschaakt patroon."},
+ {id:"tcl",kleurNaam:"roze",hoogte:25,verw:4,alt:true,naam:"Botanische tulp",lat:"Tulipa clusiana",wiki:"Tulipa_clusiana",n:100,unit:0.30,step:25,bloei:[4],diep:10,afst:10,dens:50,kleur:"var(--roze)",hex:"#E8A0B8",sup:"bul",rate:200,note:"Dé tulp die in Vlaamse grond wél jaren terugkomt."},
+ {id:"leu",kleurNaam:"wit",hoogte:45,verw:4,alt:true,naam:"Zomerklokje",lat:"Leucojum aestivum",wiki:"Leucojum_aestivum",n:50,unit:0.60,step:10,bloei:[4,5],diep:10,afst:15,dens:25,kleur:"var(--wit)",hex:"#EDEDE0",sup:"eco",rate:120,note:"Groot sneeuwklokje voor natte plekken; bloeit laat."},
+ {id:"npo",kleurNaam:"wit",hoogte:40,verw:4,alt:true,naam:"Dichtersnarcis",lat:"Narcissus poeticus recurvus",wiki:"Narcissus_poeticus",n:100,unit:0.35,step:25,bloei:[5],diep:14,afst:12,dens:30,kleur:"var(--wit)",hex:"#F0E8D0",sup:"war",rate:120,note:"De laatste en meest geurende narcis — rekt narcisseizoen tot mei."},
+ {id:"nec",kleurNaam:"paars",hoogte:90,verw:4,alt:true,naam:"Honinglook",lat:"Nectaroscordum siculum",wiki:"Allium_siculum",n:50,unit:0.55,step:10,bloei:[5,6],diep:12,afst:15,dens:15,kleur:"var(--paars)",hex:"#C4A8D8",sup:"bul",rate:120,note:"Hangende klokjes, hommelmagneet, zelfzaaier."}
 ];
 const SUPS={
  war:{naam:"De Warande · sterkebollen.nl",sub:"bestellen nu, levering september"},
@@ -521,7 +534,7 @@ function renderBinfo(){
     return;
   }
   const s=sp(brush);
-  w.innerHTML=`<b>${s.naam}</b> · ${laagVan(s)==="d"?"dieplaag":"bovenlaag"} · ${s.diep} cm diep · ${s.afst} cm tussen · advies ${s.dens}/m² · ${plantWanneer(s)}${s.note?" · "+s.note:""}`;
+  w.innerHTML=`<b>${s.naam}</b> · ${laagVan(s)==="d"?"dieplaag":"bovenlaag"} · ${s.hoogte} cm hoog · ${s.diep} cm diep · ${s.afst} cm tussen · verwildering ${"★".repeat(s.verw)}${"☆".repeat(5-s.verw)} · ${plantWanneer(s)}${s.note?" · "+s.note:""}`;
 }
 function renderScrub(){
   const w=document.getElementById("scrub");w.innerHTML="";
@@ -707,7 +720,16 @@ function analyse(){
   if(actief.length){
     const gaten=[];
     for(let md=Math.min(...actief);md<=Math.max(...actief);md++)if(pct[md]<20)gaten.push(MND[md]);
-    if(gaten.length)punten.push(`Bloeigat in ${gaten.join(" en ")} — trommelstokjes of honinglook vullen juni–juli, muscari en boshyacint het voorjaar.`);
+    if(gaten.length)punten.push(`Bloeigat in ${gaten.join(" en ")} — voeg ±60–100 trommelstokjes of 40 honinglook toe in 2–3 losse drifts (juni–juli), of muscari/boshyacint voor het voorjaar.`);
+    const laatst=Math.max(...actief);
+    if(laatst<=5)punten.push(`Je bloeiseizoen stopt al in ${MND[laatst]} — trommelstokjes (jun–jul) of honinglook rekken het bijna twee maanden.`);
+    let bontste=null;
+    for(let md=1;md<=7;md++){
+      const fam=new Set();
+      for(let i=0;i<COLS*ROWS;i++)celIds(i).forEach(id=>{const s=sp(id);if(s.bloei.includes(md))fam.add(s.kleurNaam);});
+      if(fam.size>=4&&(!bontste||fam.size>bontste.n))bontste={md,n:fam.size};
+    }
+    if(bontste)punten.push(`In ${MND[bontste.md]} concurreren ${bontste.n} kleurfamilies — beperk tot 2–3 voor een rustiger beeld.`);
   }
   active().forEach(s=>{
     const comps=componenten(s.id);
@@ -750,6 +772,15 @@ function renderDStats(){
     lbls+=`<span>${MND[md]}</span>`;
   }
   bars+='</div>';lbls+='</div>';
+  const FAMHEX={paars:"#9B7FE0",geel:"#EFC94C",wit:"#E8E3D5",blauw:"#7FA8E0",roze:"#E08AAE",gemengd:"#B7AB96"};
+  let kb='<div class="ov-h">Kleurboog per maand</div><div class="bp-lbl" style="margin-bottom:10px">';
+  for(let md=1;md<=7;md++){
+    const fam=new Set();
+    for(let i=0;i<COLS*ROWS;i++)celIds(i).forEach(id=>{const s=sp(id);if(s.bloei.includes(md))fam.add(s.kleurNaam);});
+    kb+='<span>'+([...fam].map(f=>`<i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${FAMHEX[f]};margin:0 1px"></i>`).join("")||'<i style="display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid var(--lijn)"></i>')+'</span>';
+  }
+  kb+='</div>';
+  lbls+=kb;
   let rows="";
   [["d","Onderin — dieplaag"],["o","Bovenop — bovenlaag"]].forEach(([laag,titel])=>{
     const met=active().filter(s=>laagVan(s)===laag&&paintedM2(s.id)>0);
@@ -822,7 +853,7 @@ function cardEl(s,isAlt){
     <div style="flex:1;min-width:0">
       <h3>${s.naam}</h3><div class="lat">${s.lat}</div>
       ${isAlt?"":`<div class="plek">→ ${plekOf(s)}</div>`}
-      <div class="meta"><span><b>${isAlt?s.n+" advies":qEff(s.id)}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>advies <b>${s.dens}</b>/m²</span><span>max <b>${perM2}</b>/m²</span></div>
+      <div class="meta"><span><b>${isAlt?s.n+" advies":qEff(s.id)}</b> st</span><span><b>${s.hoogte}</b> cm hoog</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>advies <b>${s.dens}</b>/m²</span><span>verw. <b>${"★".repeat(s.verw)}</b></span></div>
       <div class="chips">${isAlt
         ?`<button class="chip add" data-id="${s.id}">+ voeg toe aan plan</button>`
         :`<button class="chip ${st.planted?"on":""}" data-act="plant" data-id="${s.id}">${st.planted?"✓ geplant":"geplant"}</button>${s.alt?`<button class="chip" data-act="rm" data-id="${s.id}">verwijder uit plan</button>`:""}`}
@@ -909,7 +940,20 @@ function renderOrder(){
   document.getElementById("t-zand").textContent=c.z.L+" L · "+c.z.zakken+" zakken";
   document.getElementById("t-prijs").textContent=eur(c.prijs);
 }
-function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();renderTuner();}
+function renderPlantKal(){
+  const w=document.getElementById("plantkal");if(!w)return;
+  const met=active().filter(s=>S.qty[s.id]>0);
+  if(!met.length){w.innerHTML='<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Vul eerst de bestellijst.</span></div>';return;}
+  const grp={"Nu bestellen (Ecoflora al open, rest volgt)":met,"September–oktober planten":met.filter(s=>!["tul","tcl","gal"].includes(s.id)),"November planten (koelere grond)":met.filter(s=>["tul","tcl"].includes(s.id)),"Januari–februari: in het groen":met.filter(s=>s.id==="gal")};
+  let uit="";
+  Object.entries(grp).forEach(([titel,lijst])=>{
+    if(!lijst.length)return;
+    uit+=`<div class="ov-h">${titel}</div>`;
+    lijst.forEach(s=>{uit+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${S.qty[s.id]} × ${s.naam}</span><span>${s.diep} cm diep</span></div>`;});
+  });
+  w.innerHTML=uit;
+}
+function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();renderTuner();renderPlantKal();}
 
 function orderText(){
   const c=calc(),lines=["Bestellijst bollenveld 6×4 m (Duffel) — schikking: "+ARR[S.arr].titel,""];
@@ -991,6 +1035,101 @@ function renderTuner(){
 document.getElementById("tun-apply").onclick=()=>{
   tunSugg().forEach(x=>S.qty[x.id]=x.q);
   save();refresh();melding("Mix toegepast op de aantallen");
+};
+
+/* --- ontwerpgenerator --- */
+let genSeed=1,genStijl="drifts",genPrio="bloei",genKleur="vrij";
+const KLEURSETS={pw:["paars","wit"],bwg:["blauw","wit","geel"],warm:["geel","wit","roze"],vrij:null};
+const BIJEN=["cro","era","mus","aps","asp","nec","gal","chi"];
+function genscore(s){
+  let sc=s.verw;
+  if(genPrio==="bijen"&&BIJEN.includes(s.id))sc+=4;
+  if(genPrio==="verw")sc+=s.verw*1.5;
+  if(genPrio==="bloei"&&(s.bloei.includes(1)||s.bloei.includes(6)||s.bloei.includes(7)))sc+=3;
+  return sc+2*rnd(genSeed*13+s.id.charCodeAt(0)*7+s.id.charCodeAt(2));
+}
+function genKies(){
+  const kl=KLEURSETS[genKleur];
+  let pool=SPECIES.filter(s=>!kl||kl.includes(s.kleurNaam));
+  pool.sort((a,b)=>genscore(b)-genscore(a));
+  const maxO=genPrio==="rust"?3:4,maxD=genPrio==="rust"?2:3;
+  const omix=pool.filter(s=>laagVan(s)==="o"&&!["iri","asp","tcl"].includes(s.id)).slice(0,maxO);
+  const dmix=pool.filter(s=>laagVan(s)==="d"&&!["cam","leu"].includes(s.id)).slice(0,maxD);
+  if(genPrio==="bloei"){
+    const dekt=new Set([...omix,...dmix].flatMap(s=>s.bloei));
+    for(let md=1;md<=7;md++)if(!dekt.has(md)){
+      const kand=pool.find(s=>s.bloei.includes(md)&&!omix.includes(s)&&!dmix.includes(s));
+      if(kand){(laagVan(kand)==="o"?omix:dmix).push(kand);kand.bloei.forEach(m=>dekt.add(m));}
+    }
+  }
+  const west=pool.filter(s=>["iri","asp","tcl","tul"].includes(s.id)).slice(0,2);
+  const kom=pool.find(s=>["cam","fri","leu"].includes(s.id))||null;
+  return{omix,dmix,west,kom};
+}
+function genBouw(){
+  const{omix,dmix,west,kom}=genKies();
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  const R=n=>rnd(genSeed*31+n);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c;
+    if(c<2&&west.length){
+      const s=west[r<ROWS/2?0:west.length-1];
+      (laagVan(s)==="d"?d:o)[i]=s.id;
+      if(west[0]&&laagVan(west[0])==="d"&&omix[0])o[i]=o[i]||omix[0].id;
+      continue;
+    }
+    if(kom&&r>=ROWS-2&&c>=6&&c<8){(laagVan(kom)==="d"?d:o)[i]=kom.id;continue;}
+    if(genStijl==="strak"){
+      const band=Math.floor((c-2)/((COLS-2)/omix.length));
+      o[i]=(omix[Math.min(band,omix.length-1)]||omix[0]).id;
+      if(dmix.length&&(r+c)%3===0)d[i]=dmix[Math.min(Math.floor((c-2)/((COLS-2)/dmix.length)),dmix.length-1)].id;
+    }else if(genStijl==="stinzen"){
+      o[i]=omix[Math.floor(R(i)*omix.length)].id;
+      if(dmix.length&&R(i*3+1)<0.3)d[i]=dmix[Math.floor(R(i*5+2)*dmix.length)].id;
+    }else{ /* drifts */
+      o[i]=omix[0].id;
+    }
+  }
+  if(genStijl==="drifts"){
+    dmix.concat(omix.slice(1)).forEach((s,k)=>{
+      for(let blob=0;blob<2;blob++){
+        const cr=1+Math.floor(R(k*17+blob*7)* (ROWS-3));
+        const cc=3+Math.floor(R(k*23+blob*11)*(COLS-6));
+        for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){
+          const r=cr+dr,c=cc+dc;
+          if(r<0||r>=ROWS||c<2||c>=COLS)continue;
+          if(Math.hypot(dr,dc)<=1.9*(0.8+0.4*R(k*31+dr*7+dc*13)))
+            (laagVan(s)==="d"?d:o)[r*COLS+c]=s.id;
+        }
+      }
+    });
+  }
+  return{d,o,gebruikt:[...omix,...dmix,...west,...(kom?[kom]:[])]};
+}
+function renderGen(){
+  const rows=[["gen-stijl",[["drifts","Drifts"],["stinzen","Stinzen"],["strak","Strak"]],()=>genStijl,v=>genStijl=v],
+              ["gen-prio",[["bloei","Lange bloei"],["verw","Verwildering"],["bijen","Bijen"],["rust","Rust"]],()=>genPrio,v=>genPrio=v],
+              ["gen-kleur",[["vrij","Vrij"],["pw","Paars-wit"],["bwg","Blauw-wit-geel"],["warm","Warm"]],()=>genKleur,v=>genKleur=v]];
+  rows.forEach(([id,opts,get,set])=>{
+    const w=document.getElementById(id);if(!w)return;w.innerHTML="";
+    opts.forEach(([k,lbl])=>{
+      const b=document.createElement("button");
+      if(get()===k)b.className="on";
+      b.textContent=lbl;
+      b.onclick=()=>{set(k);renderGen();};
+      w.appendChild(b);
+    });
+  });
+}
+document.getElementById("gen-btn").onclick=()=>{
+  pushHist();
+  const uit=genBouw();
+  S.gd={d:uit.d,o:uit.o};
+  uit.gebruikt.forEach(s=>{if(s.alt&&!S.plan[s.id]){S.plan[s.id]=true;if(!S.qty[s.id])S.qty[s.id]=s.n;}});
+  genSeed++;
+  save();paintGrid();refresh();
+  const mnd=uit.gebruikt.flatMap(s=>s.bloei);
+  melding(`Ontwerp: ${uit.gebruikt.length} soorten · ${MND[Math.min(...mnd)]}–${MND[Math.max(...mnd)]}`);
 };
 
 /* --- voorbeeldschikkingen in het raster --- */
@@ -1210,7 +1349,7 @@ async function load(){
       delete S.grid;}
   }catch(e){}
 }
-(async()=>{await load();buildGrid();renderScrub();renderLaagview();renderSize();renderTool();renderVB();refresh();renderSaves();})();
+(async()=>{await load();buildGrid();renderScrub();renderLaagview();renderSize();renderTool();renderVB();renderGen();refresh();renderSaves();})();
 </script>
 </body>
 </html>
