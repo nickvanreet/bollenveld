@@ -731,6 +731,169 @@ document.getElementById("apply-design").onclick=()=>{
 };
 document.getElementById("clear-design").onclick=()=>{pushHist();S.gd={d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)};save();paintGrid();renderDStats();renderBloeiInfo();if(S.arr==="vrij")refresh();};
 
+/* --- soorten + lightbox --- */
+function placeholder(k){return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="${k}"/><circle cx="15" cy="24" r="6" fill="${k}" opacity=".7"/><circle cx="33" cy="24" r="6" fill="${k}" opacity=".7"/><rect x="22.5" y="26" width="3" height="16" rx="1.5" fill="#6FB98A"/></svg>`;}
+const fotoCache={};
+async function foto(s,el){
+  if(fotoCache[s.id]){plaats(fotoCache[s.id]);return;}
+  const kandidaten=[];let i=0;
+  function volgende(){if(i<kandidaten.length)plaats(kandidaten[i++]);}
+  function plaats(src){
+    const img=new Image();img.alt=s.naam;
+    img.onload=()=>{el.innerHTML="";el.appendChild(img);fotoCache[s.id]=src;};
+    img.onerror=volgende;
+    img.src=src;
+  }
+  for(const w of ["nl","en"]){
+    try{
+      const r=await fetch(`https://${w}.wikipedia.org/api/rest_v1/page/summary/`+encodeURIComponent(s.wiki));
+      if(!r.ok)continue;
+      const d=await r.json();
+      if(d.thumbnail&&d.thumbnail.source){
+        kandidaten.push(d.thumbnail.source.replace(/\/\d+px-/,"/320px-"));
+        kandidaten.push(d.thumbnail.source);
+      }
+      if(d.originalimage&&d.originalimage.source)kandidaten.push(d.originalimage.source);
+      if(kandidaten.length)break;
+    }catch(e){}
+  }
+  volgende();
+}
+const lb=document.getElementById("lb");
+lb.onclick=()=>lb.classList.remove("on");
+function openLb(s){
+  const src=fotoCache[s.id];if(!src)return;
+  lb.querySelector("img").src=src.replace(/\/\d+px-/,"/640px-");
+  lb.querySelector(".lb-t").textContent=s.naam;
+  lb.querySelector(".lb-s").textContent=s.lat;
+  lb.querySelector(".lb-n").textContent=(s.note||"")+" Bloei: "+["","jan","feb","mrt","apr","mei","jun","jul"][s.bloei[0]]+"–"+["","jan","feb","mrt","apr","mei","jun","jul"][s.bloei[s.bloei.length-1]]+" · "+s.diep+" cm diep · advies "+s.dens+"/m².";
+  lb.classList.add("on");
+}
+function cardEl(s,isAlt){
+  const st=S.st[s.id]||{};
+  const perM2=Math.round(10000/(s.afst*s.afst));
+  const c=document.createElement("div");c.className="card";
+  c.innerHTML=`<div class="ph" id="ph-${s.id}">${placeholder(s.kleur)}</div>
+    <div style="flex:1;min-width:0">
+      <h3>${s.naam}</h3><div class="lat">${s.lat}</div>
+      ${isAlt?"":`<div class="plek">→ ${plekOf(s)}</div>`}
+      <div class="meta"><span><b>${isAlt?s.n+" advies":qEff(s.id)}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>advies <b>${s.dens}</b>/m²</span><span>max <b>${perM2}</b>/m²</span></div>
+      <div class="chips">${isAlt
+        ?`<button class="chip add" data-id="${s.id}">+ voeg toe aan plan</button>`
+        :`<button class="chip ${st.planted?"on":""}" data-act="plant" data-id="${s.id}">${st.planted?"✓ geplant":"geplant"}</button>${s.alt?`<button class="chip" data-act="rm" data-id="${s.id}">verwijder uit plan</button>`:""}`}
+      </div>
+      ${s.note?`<div class="note">${s.note}</div>`:""}
+    </div>`;
+  c.querySelector(".ph").onclick=()=>openLb(s);
+  foto(s,c.querySelector("#ph-"+s.id));
+  return c;
+}
+function renderCards(){
+  document.getElementById("soorten-hint").textContent="Plek volgens gekozen schikking: "+ARR[S.arr].titel.toLowerCase()+". Vuistregel diepte: 2–3× de bolhoogte. Tik op een foto voor groot beeld.";
+  const w=document.getElementById("cards");w.innerHTML="";
+  active().forEach(s=>w.appendChild(cardEl(s,false)));
+  const aw=document.getElementById("altcards");aw.innerHTML="";
+  SPECIES.filter(s=>s.alt&&!S.plan[s.id]).forEach(s=>aw.appendChild(cardEl(s,true)));
+  document.querySelectorAll("#cards .chip,#altcards .chip").forEach(c=>{
+    c.onclick=()=>{
+      const id=c.dataset.id;
+      if(c.classList.contains("add")){S.plan[id]=true;S.qty[id]=sp(id).n;}
+      else if(c.dataset.act==="rm"){delete S.plan[id];S.qty[id]=0;}
+      else{S.st[id]=S.st[id]||{};S.st[id].planted=!S.st[id].planted;}
+      save();refresh();
+    };
+  });
+}
+
+/* --- bestellijst --- */
+function zoneInfoFor(s){
+  if(S.arr==="vrij"){const v=vrijStats(s);return v?{txt:`ontwerp ${v.m2} m²: ${Math.round(v.dens)}/m² · ${v.label}`,kleur:v.kleur}:null;}
+  const zo=ARR[S.arr].zones.find(z=>z.ids.includes(s.id));
+  if(!zo)return null;
+  const st=zoneStats(zo);
+  return{txt:`${zo.naam.toLowerCase()}: ${Math.round(st.dens)}/m² · ${st.label}`,kleur:st.kleur};
+}
+function renderOrder(){
+  const w=document.getElementById("order");w.innerHTML="";
+  const leeg=lijstLeeg();
+  ["totals-box","copy","reset-qty","tuner"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=leeg?"none":"";});
+  if(leeg){
+    w.innerHTML=`<div class="check"><div class="zone"><div class="zone-info"><b>Je bestellijst is nog leeg</b><span>kies een schikking of teken een ontwerp, en klik die door naar de lijst</span></div></div></div>
+      <button class="btn" id="vul-nu" style="margin-top:12px">Gebruik gekozen schikking (adviesaantallen)</button>`;
+    document.getElementById("vul-nu").onclick=()=>{vulAdviesVoor(S.arr);save();refresh();melding("Adviesaantallen gezet");};
+    return;
+  }
+  ["war","bul","eco","jan","mat"].forEach(g=>{
+    const items=active().filter(s=>s.sup===g&&S.qty[s.id]>0);
+    if(g!=="mat"&&!items.length)return;
+    const sub=g==="mat"?zand().prijs:items.reduce((a,s)=>a+S.qty[s.id]*s.unit,0);
+    const h=document.createElement("div");h.className="grp";
+    h.innerHTML=`<span>${SUPS[g].naam}<br><span style="text-transform:none;letter-spacing:0">${SUPS[g].sub}</span></span><b>${eur(sub)}</b>`;
+    w.appendChild(h);
+    items.forEach(s=>{
+      const zi=zoneInfoFor(s);
+      const row=document.createElement("div");
+      row.className="order-row"+(S.done[s.id]?" done":"");
+      row.innerHTML=`<button class="order-check" aria-label="besteld">${S.done[s.id]?"✓":""}</button>
+        <div class="order-info"><b>${s.naam}</b><span>${s.lat}</span>
+          ${zi?`<div class="dens" style="color:${zi.kleur}">${zi.txt}</div>`:""}</div>
+        <div class="stepper"><button aria-label="minder">−</button><div class="qty">${S.qty[s.id]}</div><button aria-label="meer">+</button></div>
+        <div class="order-price">${eur(S.qty[s.id]*s.unit)}</div>`;
+      row.querySelector(".order-check").onclick=()=>{S.done[s.id]=!S.done[s.id];save();renderOrder();};
+      const [minus,plus]=row.querySelectorAll(".stepper button");
+      minus.onclick=()=>{S.qty[s.id]=Math.max(0,S.qty[s.id]-s.step);save();refresh();};
+      plus.onclick=()=>{S.qty[s.id]+=s.step;save();refresh();};
+      w.appendChild(row);
+    });
+    if(g==="mat"){
+      const z=zand();
+      const row=document.createElement("div");
+      row.className="order-row"+(S.done.zand?" done":"");
+      row.innerHTML=`<button class="order-check">${S.done.zand?"✓":""}</button>
+        <div class="order-info"><b>Scherp zand</b><span>${z.zakken} zakken van 25 kg · ${z.L} L voor ${ARR[S.arr].zandM2} m² westrand</span></div>
+        <div class="order-price">${eur(z.prijs)}</div>`;
+      row.querySelector(".order-check").onclick=()=>{S.done.zand=!S.done.zand;save();renderOrder();};
+      w.appendChild(row);
+    }
+  });
+  const c=calc();
+  document.getElementById("t-bollen").textContent=c.bollen.toLocaleString("nl-BE");
+  document.getElementById("t-dicht").textContent=Math.round(c.dicht)+" /m²";
+  document.getElementById("t-gaten").textContent=c.gaten.toLocaleString("nl-BE");
+  document.getElementById("t-tijd").textContent=(Math.round(c.uren*2)/2).toLocaleString("nl-BE")+" u";
+  document.getElementById("t-zand").textContent=c.z.L+" L · "+c.z.zakken+" zakken";
+  document.getElementById("t-prijs").textContent=eur(c.prijs);
+}
+function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();renderTuner();}
+
+function orderText(){
+  const c=calc(),lines=["Bestellijst bollenveld 6×4 m (Duffel) — schikking: "+ARR[S.arr].titel,""];
+  ["war","bul","eco","jan"].forEach(g=>{
+    const items=active().filter(s=>s.sup===g&&S.qty[s.id]>0);
+    if(!items.length)return;
+    lines.push(SUPS[g].naam+" ("+SUPS[g].sub+"):");
+    items.forEach(s=>lines.push(`  ${S.qty[s.id]} × ${s.lat} — ${eur(S.qty[s.id]*s.unit)}`));
+    lines.push("");
+  });
+  const z=zand();
+  lines.push(`Bouwhandel: ${z.zakken} zakken scherp zand (25 kg) — ${eur(z.prijs)}`,"",
+    `Totaal: ${c.bollen} bollen (${Math.round(c.dicht)}/m²) — ±${eur(c.prijs)}`,
+    `Planttijd geschat: ${Math.round(c.uren*2)/2} uur, ${c.gaten} plantgaten`);
+  return lines.join("\n");
+}
+document.getElementById("copy").onclick=async()=>{
+  const t=orderText();
+  try{await navigator.clipboard.writeText(t);}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");ta.remove();
+  }
+  const toast=document.getElementById("toast");
+  toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1600);
+};
+document.getElementById("reset-qty").onclick=()=>{vulAdviesVoor(S.arr);save();refresh();};
+document.getElementById("leeg-lijst").onclick=()=>{SPECIES.forEach(s=>S.qty[s.id]=0);save();refresh();};
+
 /* --- doorklikken naar bestellijst + mix-tuner --- */
 function vulAdviesVoor(k){
   SPECIES.forEach(s=>{if(s.alt&&!S.plan[s.id])S.qty[s.id]=0;});
