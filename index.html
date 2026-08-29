@@ -8,44 +8,87 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --soil:#1E1812; --soil-2:#2A2219; --soil-3:#3A2F22;
-  --chalk:#F2EADA; --chalk-dim:#B8AC97; --chalk-mut:#8A7F6C;
-  --line:#4A3D2C;
+  --grond:#191410; --bed:#241C14; --vlak:#33281A; --lijn:#4A3B28; --hout:#5E4A2E;
+  --chalk:#F2EADA; --chalk-dim:#B7AB96; --chalk-mut:#877C69;
   --paars:#9B7FE0; --geel:#EFC94C; --groen:#6FB98A; --wit:#E8E3D5; --blauw:#7FA8E0; --roze:#E08AAE; --oranje:#E0894C; --rood:#E06A5C;
+  --soil:#191410; --soil-2:#241C14; --soil-3:#33281A; --line:#4A3B28;
+  --r:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--soil);color:var(--chalk);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.55;padding-bottom:56px}
+html{background:var(--grond)}
+body{background:radial-gradient(120% 60% at 50% -10%,#2A2114 0%,var(--grond) 55%);color:var(--chalk);
+  font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.55;padding-bottom:64px;min-height:100vh}
 .wrap{max-width:640px;margin:0 auto;padding:0 16px}
-header{padding:26px 0 8px}
-.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-mut)}
-h1{font-family:Fraunces,serif;font-weight:600;font-size:30px;line-height:1.15;margin:6px 0 4px}
-.sub{color:var(--chalk-dim);font-size:14px}
-h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
-h2 small{font-family:Inter;font-size:12px;font-weight:400;color:var(--chalk-mut);margin-left:8px}
-.nav{position:sticky;top:0;z-index:9;background:var(--soil);display:flex;gap:6px;padding:12px 0;border-bottom:1px solid var(--line)}
-.nav button{flex:1;border:1px solid var(--line);background:var(--soil-2);color:var(--chalk-dim);border-radius:10px;padding:9px 0;font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
-.nav button.on{background:var(--chalk);color:var(--soil);border-color:var(--chalk)}
-/* schikking */
-.opt{border:1px solid var(--line);background:var(--soil-2);border-radius:14px;padding:14px;margin-bottom:12px}
+/* kop */
+header{padding:30px 0 6px}
+h1{font-family:Fraunces,serif;font-weight:600;font-size:34px;line-height:1.1;letter-spacing:.01em}
+.metachips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mc{font-size:11.5px;color:var(--chalk-dim);border:1px solid var(--lijn);border-radius:999px;padding:3px 11px;background:rgba(0,0,0,.15)}
+.eyebrow{display:none}.sub{display:none}
+/* navigatie */
+.nav{position:sticky;top:0;z-index:9;background:linear-gradient(var(--grond) 82%,transparent);display:flex;gap:6px;padding:14px 0 12px}
+.nav button{flex:1;border:1px solid var(--lijn);background:var(--bed);color:var(--chalk-dim);border-radius:11px;padding:10px 0;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;letter-spacing:.02em}
+.nav button.on{background:var(--chalk);color:var(--grond);border-color:var(--chalk)}
+.pane{display:none}.pane.on{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* secties */
+.sec{background:var(--bed);border:1px solid var(--lijn);border-radius:var(--r);padding:14px;margin:0 0 14px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-mut);margin-bottom:12px}
+.saved{color:var(--groen);letter-spacing:.04em;text-transform:none;font-size:11.5px}
+h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-mut);font-weight:600;margin:26px 0 10px}
+h2 small{font-weight:400;letter-spacing:.02em;text-transform:none;margin-left:8px;font-size:11px}
+.pal-h{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-mut);margin:10px 2px 6px}
+.ov-h{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-mut);padding:10px 0 4px}
+/* knoppenrijen */
+.scrub{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0;scrollbar-width:none}
+.scrub::-webkit-scrollbar{display:none}
+.scrub button{flex:none;border:1px solid var(--lijn);background:var(--vlak);color:var(--chalk-dim);border-radius:9px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
+.scrub button.on{background:var(--chalk);color:var(--grond);border-color:var(--chalk);font-weight:600}
+.seg{background:var(--vlak);border:1px solid var(--lijn);border-radius:11px;padding:3px;gap:3px;overflow-x:auto;margin-bottom:8px}
+.seg button{border:none;background:transparent;flex:1;min-width:max-content}
+.seg button.on{background:var(--chalk);color:var(--grond)}
+/* palet */
+.palette{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 6px;scrollbar-width:none}
+.palette::-webkit-scrollbar{display:none}
+.pal{flex:none;display:flex;align-items:center;gap:7px;border:1.5px solid var(--lijn);background:var(--vlak);color:var(--chalk-dim);border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit}
+.pal.on{border-color:var(--chalk);color:var(--chalk);background:var(--bed)}
+.pal i{width:13px;height:13px;border-radius:50%;display:inline-block;box-shadow:0 0 6px rgba(0,0,0,.4)}
+.pal small{color:var(--chalk-mut);font-weight:400;font-size:10.5px}
+.binfo{font-size:12.5px;color:var(--chalk);background:var(--vlak);border:1px solid var(--lijn);border-radius:10px;padding:9px 12px;margin-top:8px;min-height:20px}
+/* het plantbed */
+.gridbox{background:var(--vlak);border:1px solid var(--hout);border-radius:12px;padding:10px;box-shadow:inset 0 2px 14px rgba(0,0,0,.45)}
+.gridlbl{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-mut);margin-bottom:7px}
+.gridwrap{position:relative}
+#grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;touch-action:none}
+#grid .cell{aspect-ratio:1;background:#2B2115;border-radius:2px}
+#veldbeeld{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;border-radius:6px}
+.veld #veldbeeld{display:block}
+.veld #grid .cell{opacity:.12}
+.bloei-info{font-size:12.5px;color:var(--chalk-dim);margin:2px 2px 0;min-height:18px}
+/* schikkingen */
+.opt{border:1px solid var(--lijn);background:var(--bed);border-radius:var(--r);padding:14px;margin-bottom:12px}
 .opt.on{border-color:var(--groen);box-shadow:0 0 0 1px var(--groen)}
 .opt-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;cursor:pointer}
 .opt h3{font-family:Fraunces,serif;font-weight:600;font-size:18px}
-.badge{font-size:11px;color:#12281A;background:var(--groen);border-radius:999px;padding:3px 10px;font-weight:600;white-space:nowrap}
+.badge{font-size:10.5px;color:#12281A;background:var(--groen);border-radius:999px;padding:3px 10px;font-weight:700;white-space:nowrap}
 .opt-body{display:flex;gap:14px;margin-top:10px;cursor:pointer}
-.opt svg{width:120px;height:84px;flex:none;border-radius:8px;background:var(--soil-3)}
+.opt svg{width:120px;height:84px;flex:none;border-radius:8px;background:var(--vlak)}
 .opt ul{list-style:none;font-size:12.5px;color:var(--chalk-dim)}
 .opt li{margin-bottom:3px}
 .opt li b{color:var(--chalk)}
-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
-summary{font-size:13px;font-weight:500;color:var(--groen);cursor:pointer;list-style:none}
+details{border-top:1px solid var(--lijn);margin-top:12px;padding-top:10px}
+details.sec,details.opt{border-top:1px solid var(--lijn)}
+details.sec{border:1px solid var(--lijn);padding:14px}
+summary{font-size:12.5px;font-weight:600;color:var(--groen);cursor:pointer;list-style:none}
 summary::before{content:"→ "}
 details[open] summary::before{content:"↓ "}
 details ol{margin:10px 0 2px 18px;font-size:13px;color:var(--chalk-dim)}
 details li{margin-bottom:6px}
 details li b{color:var(--chalk)}
-/* veldcheck */
-.check{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:6px 14px}
-.zone{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+/* lijsten & controles */
+.check,.design-stats{background:var(--bed);border:1px solid var(--lijn);border-radius:var(--r);padding:4px 14px}
+.design-stats{padding:10px 14px}
+.zone{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--lijn)}
 .zone:last-child{border-bottom:none}
 .dot{width:10px;height:10px;border-radius:50%;flex:none}
 .zone-info{flex:1;min-width:0}
@@ -53,118 +96,98 @@ details li b{color:var(--chalk)}
 .zone-info span{font-size:11.5px;color:var(--chalk-mut)}
 .zone-num{text-align:right;flex:none}
 .zone-num b{font-size:15px;display:block}
-.zone-num span{font-size:11px;color:var(--chalk-mut)}
+.zone-num span{font-size:10.5px;color:var(--chalk-mut)}
 .legend{display:flex;gap:14px;font-size:11.5px;color:var(--chalk-mut);margin:8px 2px 0;flex-wrap:wrap}
 .legend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
-/* ontwerp */
-.palette{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 10px}
-.pal{flex:none;display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--soil-2);color:var(--chalk-dim);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit}
-.pal.on{border-color:var(--chalk);color:var(--chalk)}
-.pal i{width:12px;height:12px;border-radius:50%;display:inline-block}
-.gridbox{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:12px}
-.gridlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--chalk-mut);margin-bottom:6px}
-#grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;touch-action:none}
-#grid .cell{aspect-ratio:1;background:var(--soil-3);border-radius:3px}
-.design-stats{margin-top:14px}
-.ds-row{display:flex;align-items:center;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.ds-row{display:flex;align-items:center;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px solid var(--lijn)}
 .ds-row:last-child{border-bottom:none}
 .ds-row i{width:10px;height:10px;border-radius:50%;flex:none}
 .ds-row .n{flex:1}
 .ds-row b{font-variant-numeric:tabular-nums}
-.scrub{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:10px 0 2px}
-.scrub button{flex:none;border:1px solid var(--line);background:var(--soil-2);color:var(--chalk-dim);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:inherit}
-.scrub button.on{background:var(--geel);color:#241C08;border-color:var(--geel);font-weight:600}
-.bloei-info{font-size:12.5px;color:var(--chalk-dim);margin:4px 2px 0;min-height:18px}
-.pal small{color:var(--chalk-mut);font-weight:400;font-size:10.5px}
-.pal-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-mut);margin:8px 2px 4px}
-.binfo{font-size:12.5px;color:var(--chalk);background:var(--soil-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 10px;min-height:20px}
-.bp{display:flex;gap:4px;align-items:flex-end;height:64px;margin:8px 0 2px}
+.bp{display:flex;gap:4px;align-items:flex-end;height:60px;margin:6px 0 2px}
 .bpb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:0}
-.bpb i{display:block;background:var(--groen);border-radius:3px 3px 0 0;width:100%;min-height:2px}
-.bpb.on i{background:var(--geel)}
-.bp-lbl{display:flex;gap:4px;font-size:10.5px;color:var(--chalk-mut);text-align:center;margin-bottom:6px}
+.bpb i{display:block;background:var(--groen);border-radius:3px 3px 0 0;width:100%;min-height:2px;opacity:.85}
+.bpb.on i{background:var(--geel);opacity:1}
+.bp-lbl{display:flex;gap:4px;font-size:10px;color:var(--chalk-mut);text-align:center;margin-bottom:4px}
 .bp-lbl span{flex:1}
-.ov-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-mut);padding:8px 0 2px}
-.gridwrap{position:relative}
-#veldbeeld{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;border-radius:6px}
-.veld #veldbeeld{display:block}
-.veld #grid .cell{opacity:.14}
 /* kalender */
-.cal{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px}
-.cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
+.cal{background:var(--bed);border:1px solid var(--lijn);border-radius:var(--r);padding:14px 14px 10px}
+.cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:10.5px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
 .cal-row{display:flex;align-items:center;margin-bottom:7px}
 .cal-name{width:104px;flex:none;font-size:12px;color:var(--chalk-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
-.cal-track{flex:1;display:grid;grid-template-columns:repeat(7,1fr);height:12px;border-radius:6px;background:var(--soil-3)}
+.cal-track{flex:1;display:grid;grid-template-columns:repeat(7,1fr);height:12px;border-radius:6px;background:var(--vlak)}
 .cal-bar{border-radius:6px;height:12px}
-/* cards */
-.card{display:flex;gap:14px;background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
-.ph{width:92px;height:92px;flex:none;border-radius:10px;overflow:hidden;background:var(--soil-3);display:flex;align-items:center;justify-content:center;cursor:pointer}
+/* soortkaarten */
+.card{display:flex;gap:14px;background:var(--bed);border:1px solid var(--lijn);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.ph{width:88px;height:88px;flex:none;border-radius:10px;overflow:hidden;background:var(--vlak);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
-.ph svg{width:44px;height:44px}
+.ph svg{width:42px;height:42px}
 .card h3{font-family:Fraunces,serif;font-weight:600;font-size:17px;line-height:1.2}
 .lat{font-size:12px;font-style:italic;color:var(--chalk-mut)}
 .plek{font-size:12.5px;color:var(--groen);margin-top:3px}
-.meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12.5px;color:var(--chalk-dim);margin:7px 0 9px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 13px;font-size:12px;color:var(--chalk-dim);margin:7px 0 9px}
 .meta b{color:var(--chalk);font-weight:600}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:transparent;color:var(--chalk-dim);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;cursor:pointer;font:inherit}
+.chip{border:1px solid var(--lijn);background:transparent;color:var(--chalk-dim);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;cursor:pointer;font:inherit}
 .chip.on{background:var(--groen);border-color:var(--groen);color:#12281A}
 .chip.add{border-color:var(--groen);color:var(--groen)}
 .note{font-size:12.5px;color:var(--oranje);margin-top:8px}
 /* bestellijst */
-.grp{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-mut);margin:18px 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.grp{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-mut);margin:20px 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
 .grp b{color:var(--chalk-dim);letter-spacing:0;text-transform:none;font-size:13px}
-.order-row{display:flex;align-items:center;gap:10px;background:var(--soil-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
-.order-row.done{opacity:.45}
-.order-check{width:22px;height:22px;flex:none;border:1.5px solid var(--chalk-mut);border-radius:6px;background:transparent;cursor:pointer;color:#12281A;font-size:14px;line-height:1;font-weight:700}
+.order-row{display:flex;align-items:center;gap:10px;background:var(--bed);border:1px solid var(--lijn);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.order-row.done{opacity:.42}
+.order-check{width:22px;height:22px;flex:none;border:1.5px solid var(--chalk-mut);border-radius:7px;background:transparent;cursor:pointer;color:#12281A;font-size:14px;line-height:1;font-weight:700}
 .order-row.done .order-check{background:var(--groen);border-color:var(--groen)}
 .order-info{flex:1;min-width:0}
 .order-info b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.order-info span{font-size:11.5px;color:var(--chalk-mut)}
-.dens{font-size:11.5px;margin-top:2px}
+.order-info span{font-size:11px;color:var(--chalk-mut)}
+.dens{font-size:11px;margin-top:2px}
 .stepper{display:flex;align-items:center;flex:none}
-.stepper button{width:32px;height:32px;border:1px solid var(--line);background:var(--soil-3);color:var(--chalk);font-size:17px;cursor:pointer}
-.stepper button:first-child{border-radius:8px 0 0 8px}
-.stepper button:last-child{border-radius:0 8px 8px 0}
-.stepper .qty{width:48px;height:32px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;background:var(--soil-2)}
-.order-price{width:48px;text-align:right;font-size:13.5px;font-weight:600;flex:none}
-.totals{background:var(--soil-3);border-radius:14px;padding:16px;margin:16px 0}
-.tot-row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--chalk-dim);padding:3px 0}
-.tot-row b{color:var(--chalk)}
-.tot-main{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
-.tot-main b{font-family:Fraunces,serif;font-size:24px;font-weight:600}
-.btn{width:100%;border:none;background:var(--chalk);color:var(--soil);border-radius:12px;padding:13px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
-.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--chalk-dim);margin-top:8px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--groen);color:#12281A;font-size:13.5px;font-weight:600;border-radius:999px;padding:9px 18px;opacity:0;pointer-events:none;z-index:30}
+.stepper button{width:31px;height:31px;border:1px solid var(--lijn);background:var(--vlak);color:var(--chalk);font-size:17px;cursor:pointer}
+.stepper button:first-child{border-radius:9px 0 0 9px}
+.stepper button:last-child{border-radius:0 9px 9px 0}
+.stepper .qty{width:46px;height:31px;border-top:1px solid var(--lijn);border-bottom:1px solid var(--lijn);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;background:var(--bed);font-variant-numeric:tabular-nums}
+.order-price{width:48px;text-align:right;font-size:13px;font-weight:600;flex:none;font-variant-numeric:tabular-nums}
+.totals{background:var(--vlak);border:1px solid var(--lijn);border-radius:var(--r);padding:16px;margin:16px 0}
+.tot-row{display:flex;justify-content:space-between;font-size:13px;color:var(--chalk-dim);padding:3px 0}
+.tot-row b{color:var(--chalk);font-variant-numeric:tabular-nums}
+.tot-main{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--lijn);margin-top:10px;padding-top:12px}
+.tot-main b{font-family:Fraunces,serif;font-size:26px;font-weight:600}
+/* knoppen */
+.btn{width:100%;border:none;background:var(--chalk);color:var(--grond);border-radius:12px;padding:14px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px}
+.btn.ghost{background:transparent;border:1px solid var(--lijn);color:var(--chalk-dim);font-weight:500;margin-top:8px}
+.btnrow{display:flex;gap:8px}
+.btnrow .btn{margin-top:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--groen);color:#12281A;font-size:13.5px;font-weight:700;border-radius:999px;padding:10px 20px;opacity:0;pointer-events:none;z-index:30;transition:opacity .2s}
 .toast.show{opacity:1}
-.hint{font-size:12.5px;color:var(--chalk-mut);margin-top:10px}
-.pane{display:none}.pane.on{display:block}
+.hint{font-size:12px;color:var(--chalk-mut);margin-top:12px}
 /* lightbox */
-#lb{position:fixed;inset:0;background:rgba(20,15,10,.92);z-index:40;display:none;align-items:center;justify-content:center;flex-direction:column;padding:24px}
+#lb{position:fixed;inset:0;background:rgba(16,12,8,.94);z-index:40;display:none;align-items:center;justify-content:center;flex-direction:column;padding:24px}
 #lb.on{display:flex}
 #lb img{max-width:100%;max-height:70vh;border-radius:14px}
 #lb .lb-t{font-family:Fraunces,serif;font-size:20px;margin-top:14px}
 #lb .lb-s{font-size:13px;font-style:italic;color:var(--chalk-dim)}
 #lb .lb-n{font-size:13px;color:var(--chalk-dim);margin-top:8px;text-align:center;max-width:420px}
-@media (prefers-reduced-motion:no-preference){.chip,.nav button,.toast,.pal{transition:all .18s}}
+:where(button):focus-visible{outline:2px solid var(--geel);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.pane.on{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="eyebrow">Duffel · zandleem · avondzon vanaf 15u</div>
   <h1>Het bollenveld</h1>
-  <div class="sub">6 × 4 m = 24 m² · bloei januari tot juli</div>
+  <div class="metachips"><span class="mc">Duffel</span><span class="mc">6 × 4 m · 24 m²</span><span class="mc">zandleem</span><span class="mc">avondzon vanaf 15u</span><span class="mc">bloei jan–jul</span></div>
 </header>
 
 <nav class="nav">
-  <button class="on" data-p="plan">Schikking</button>
-  <button data-p="ontwerp">Ontwerp</button>
+  <button class="on" data-p="ontwerp">Ontwerp</button>
+  <button data-p="plan">Schikkingen</button>
   <button data-p="soorten">Soorten</button>
   <button data-p="bestel">Bestellijst</button>
 </nav>
 
-<section class="pane on" id="pane-plan">
+<section class="pane" id="pane-plan">
   <h2>Kies je schikking</h2>
   <div id="opts"></div>
   <h2>Veldcheck<small>dichtheid, rekent live mee</small></h2>
@@ -176,37 +199,59 @@ details li b{color:var(--chalk)}
   </div>
 </section>
 
-<section class="pane" id="pane-ontwerp">
-  <h2>Vrij ontwerp<small>elke cel is 50 × 50 cm · twee lagen</small></h2>
-  <div class="pal-h">Dieplaag · 12–15 cm · komt onderin de cel</div>
-  <div class="palette" id="palette-d"></div>
-  <div class="pal-h">Bovenlaag · 5–10 cm · komt bovenop</div>
-  <div class="palette" id="palette-o"></div>
-  <div class="binfo" id="binfo"></div>
-  <div class="pal-h">Penseel</div>
-  <div class="scrub" id="sizerow"></div>
-  <div class="pal-h">Voorbeeld laden — zet een schikking in het raster, daarna vrij bij te tekenen</div>
-  <div class="scrub" id="vbrow"></div>
-  <div class="scrub" id="toolrow"></div>
-  <div class="scrub" id="laagview"></div>
-  <div class="gridbox" id="gridbox">
-    <div class="gridlbl"><span>← west (avondzon)</span><span>oost →</span></div>
-    <div class="gridwrap">
-      <div id="grid"></div>
-      <svg id="veldbeeld" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"></svg>
+<section class="pane on" id="pane-ontwerp">
+  <div class="sec">
+    <div class="sec-h"><span>Het veld</span><span class="saved" id="saved-ind"></span></div>
+    <div class="scrub seg" id="toolrow"></div>
+    <div class="gridbox" id="gridbox">
+      <div class="gridlbl"><span>← west · avondzon</span><span>oost →</span></div>
+      <div class="gridwrap">
+        <div id="grid"></div>
+        <svg id="veldbeeld" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
     </div>
+    <div class="scrub seg" id="laagview" style="margin-top:10px"></div>
+    <div class="scrub seg" id="scrub"></div>
+    <div class="bloei-info" id="bloei-info"></div>
   </div>
-  <div class="scrub" id="scrub"></div>
-  <div class="bloei-info" id="bloei-info"></div>
-  <div class="design-stats check" id="dstats" style="margin-top:14px;padding:10px 14px"></div>
+
+  <div class="sec">
+    <div class="sec-h"><span>Soorten & penseel</span></div>
+    <div class="pal-h">Dieplaag · 12–15 cm · onderin</div>
+    <div class="palette" id="palette-d"></div>
+    <div class="pal-h">Bovenlaag · 5–10 cm · bovenop</div>
+    <div class="palette" id="palette-o"></div>
+    <div class="pal-h">Penseel</div>
+    <div class="scrub seg" id="sizerow"></div>
+    <div class="binfo" id="binfo"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span>Voorbeelden — laden en vrij bijtekenen</span></div>
+    <div class="scrub" id="vbrow"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span>Overzicht & advies</span></div>
+    <div class="design-stats" id="dstats" style="border:none;padding:0;background:transparent"></div>
+  </div>
+
   <button class="btn" id="apply-design">Neem ontwerp over in bestellijst</button>
-  <button class="btn ghost" id="clear-design">Ontwerp wissen</button>
-  <h2>Bewaarde ontwerpen<small>op dit toestel</small></h2>
-  <div class="check" id="saves"></div>
-  <button class="btn ghost" id="save-design">Bewaar huidig ontwerp</button>
-  <button class="btn ghost" id="export-backup">Exporteer backup (kopieer code)</button>
-  <button class="btn ghost" id="import-backup">Importeer backup (plak code)</button>
-  <div class="hint">Het palet is verdeeld in twee lagen: dieplaagsoorten komen onderin de plantsleuf, bovenlaagsoorten erbovenop — één cel kan er één van elk hebben (lasagne) en kleurt dan onder/boven gesplitst. Teken je een alternatief, dan komt het vanzelf in het plan. Kies een maand om het palet te beperken tot wat dan bloeit én het raster als bloeibeeld te zien; met de laagknoppen bekijk je één laag apart. "Overnemen" zet de advies-aantallen (geverfde m² × dichtheid) in de bestellijst.</div>
+  <div class="btnrow">
+    <button class="btn ghost" id="save-design">Bewaar ontwerp</button>
+    <button class="btn ghost" id="jpg-btn">Bewaar als JPG</button>
+    <button class="btn ghost" id="clear-design">Wissen</button>
+  </div>
+
+  <details class="sec" style="margin-top:14px">
+    <summary>Bewaarde ontwerpen & backup</summary>
+    <div id="saves" style="margin-top:10px"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="export-backup">Exporteer backup</button>
+      <button class="btn ghost" id="import-backup">Importeer backup</button>
+    </div>
+  </details>
+  <div class="hint">Dieplaag onderin, bovenlaag erbovenop — één cel kan er één van elk hebben (lasagne). Een maand kiezen filtert het palet én toont het bloeibeeld; getekende alternatieven komen vanzelf in het plan. "Neem over" zet geverfde m² × dichtheid om naar de bestellijst.</div>
 </section>
 
 <section class="pane" id="pane-soorten">
@@ -1089,10 +1134,66 @@ document.getElementById("import-backup").onclick=()=>{
   }catch(e){melding("Geen geldige backup-code");}
 };
 
+/* --- JPG-export --- */
+function exportJPG(){
+  try{
+    const cv=document.createElement("canvas");cv.width=1240;cv.height=1080;
+    const ctx=cv.getContext("2d");
+    ctx.fillStyle="#191410";ctx.fillRect(0,0,1240,1080);
+    ctx.fillStyle="#F2EADA";ctx.font="600 46px Fraunces, Georgia, serif";ctx.fillText("Het bollenveld",70,88);
+    ctx.fillStyle="#B7AB96";ctx.font="21px Inter, sans-serif";
+    ctx.fillText("Duffel · 6 × 4 m · "+(maandSel?"bloeibeeld "+MND[maandSel]:"alle soorten"),70,124);
+    const x0=70,y0=165,cell=1100/COLS,H=cell*ROWS;
+    ctx.fillStyle="#33281A";
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x0-12,y0-12,1124,H+24,16);ctx.fill();}
+    else ctx.fillRect(x0-12,y0-12,1124,H+24);
+    ctx.fillStyle="#2B2115";ctx.fillRect(x0,y0,1100,H);
+    const sc=cell/10;
+    const teken=(id,i,k0)=>{
+      const s=sp(id),d=dotSpec(s);
+      const bloeit=maandSel===0||s.bloei.includes(maandSel);
+      const r=Math.floor(i/COLS),c=i%COLS;
+      for(let k=0;k<d.n;k++){
+        const x=x0+(c*10+1.5+7*rnd(i*31+k*17+k0))*sc;
+        const y=y0+(r*10+1.5+7*rnd(i*57+k*23+k0))*sc;
+        ctx.beginPath();
+        ctx.fillStyle=bloeit?s.hex:"#55684A";
+        ctx.globalAlpha=bloeit?1:0.55;
+        ctx.arc(x,y,(bloeit?d.r:d.r*0.5)*sc,0,7);ctx.fill();
+        ctx.globalAlpha=1;
+      }
+    };
+    for(let i=0;i<COLS*ROWS;i++){
+      if(S.gd.o[i])teken(S.gd.o[i],i,3);
+      if(S.gd.d[i])teken(S.gd.d[i],i,11);
+    }
+    let lx=70,ly=y0+H+56;
+    ctx.font="20px Inter, sans-serif";
+    active().filter(s=>paintedM2(s.id)>0).forEach(s=>{
+      const t=s.naam+" · "+paintedM2(s.id)+" m²";
+      const bw=ctx.measureText(t).width+34;
+      if(lx+bw>1170){lx=70;ly+=36;}
+      ctx.beginPath();ctx.fillStyle=s.hex;ctx.arc(lx+9,ly-7,8,0,7);ctx.fill();
+      ctx.fillStyle="#B7AB96";ctx.fillText(t,lx+26,ly);
+      lx+=bw;
+    });
+    ctx.fillStyle="#877C69";ctx.font="17px Inter, sans-serif";
+    ctx.fillText("nickvanreet.github.io/bollenveld",70,1044);
+    const a=document.createElement("a");
+    a.href=cv.toDataURL("image/jpeg",0.92);
+    a.download="bollenveld.jpg";
+    document.body.appendChild(a);a.click();a.remove();
+    melding("JPG opgeslagen");
+  }catch(e){melding("JPG maken lukte niet");}
+}
+document.getElementById("jpg-btn").onclick=exportJPG;
+
 /* --- storage --- */
 async function save(){
   try{if(window.storage)await window.storage.set(KEY,JSON.stringify(S));
   else localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  const si=document.getElementById("saved-ind");
+  if(si){si.textContent="✓ bewaard";clearTimeout(save._t);save._t=setTimeout(()=>si.textContent="",1500);}
 }
 async function load(){
   try{
