@@ -11,7 +11,7 @@
   --soil:#1E1812; --soil-2:#2A2219; --soil-3:#3A2F22;
   --chalk:#F2EADA; --chalk-dim:#B8AC97; --chalk-mut:#8A7F6C;
   --line:#4A3D2C;
-  --paars:#9B7FE0; --geel:#EFC94C; --groen:#6FB98A; --wit:#E8E3D5; --blauw:#7FA8E0; --roze:#E08AAE; --oranje:#E0894C;
+  --paars:#9B7FE0; --geel:#EFC94C; --groen:#6FB98A; --wit:#E8E3D5; --blauw:#7FA8E0; --roze:#E08AAE; --oranje:#E0894C; --rood:#E06A5C;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--soil);color:var(--chalk);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.55;padding-bottom:56px}
@@ -21,21 +21,41 @@ header{padding:26px 0 8px}
 h1{font-family:Fraunces,serif;font-weight:600;font-size:30px;line-height:1.15;margin:6px 0 4px}
 .sub{color:var(--chalk-dim);font-size:14px}
 h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
-/* nav */
+h2 small{font-family:Inter;font-size:12px;font-weight:400;color:var(--chalk-mut);margin-left:8px}
 .nav{position:sticky;top:0;z-index:9;background:var(--soil);display:flex;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .nav button{flex:1;border:1px solid var(--line);background:var(--soil-2);color:var(--chalk-dim);border-radius:10px;padding:9px 0;font:inherit;font-size:13.5px;font-weight:500;cursor:pointer}
 .nav button.on{background:var(--chalk);color:var(--soil);border-color:var(--chalk)}
 /* schikking */
-.opt{border:1px solid var(--line);background:var(--soil-2);border-radius:14px;padding:14px;margin-bottom:12px;cursor:pointer}
+.opt{border:1px solid var(--line);background:var(--soil-2);border-radius:14px;padding:14px;margin-bottom:12px}
 .opt.on{border-color:var(--groen);box-shadow:0 0 0 1px var(--groen)}
-.opt-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.opt-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;cursor:pointer}
 .opt h3{font-family:Fraunces,serif;font-weight:600;font-size:18px}
 .badge{font-size:11px;color:#12281A;background:var(--groen);border-radius:999px;padding:3px 10px;font-weight:600;white-space:nowrap}
-.opt-body{display:flex;gap:14px;margin-top:10px}
+.opt-body{display:flex;gap:14px;margin-top:10px;cursor:pointer}
 .opt svg{width:120px;height:84px;flex:none;border-radius:8px;background:var(--soil-3)}
 .opt ul{list-style:none;font-size:12.5px;color:var(--chalk-dim)}
 .opt li{margin-bottom:3px}
 .opt li b{color:var(--chalk)}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+summary{font-size:13px;font-weight:500;color:var(--groen);cursor:pointer;list-style:none}
+summary::before{content:"→ "}
+details[open] summary::before{content:"↓ "}
+details ol{margin:10px 0 2px 18px;font-size:13px;color:var(--chalk-dim)}
+details li{margin-bottom:6px}
+details li b{color:var(--chalk)}
+/* veldcheck */
+.check{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:6px 14px}
+.zone{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.zone:last-child{border-bottom:none}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.zone-info{flex:1;min-width:0}
+.zone-info b{font-size:13.5px;display:block}
+.zone-info span{font-size:11.5px;color:var(--chalk-mut)}
+.zone-num{text-align:right;flex:none}
+.zone-num b{font-size:15px;display:block}
+.zone-num span{font-size:11px;color:var(--chalk-mut)}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--chalk-mut);margin:8px 2px 0}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
 /* kalender */
 .cal{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px}
 .cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
@@ -58,25 +78,30 @@ h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
 .chip.on{background:var(--groen);border-color:var(--groen);color:#12281A}
 .note{font-size:12.5px;color:var(--oranje);margin-top:8px}
 /* bestellijst */
+.grp{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-mut);margin:18px 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.grp b{color:var(--chalk-dim);letter-spacing:0;text-transform:none;font-size:13px}
 .order-row{display:flex;align-items:center;gap:10px;background:var(--soil-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
 .order-row.done{opacity:.45}
 .order-check{width:22px;height:22px;flex:none;border:1.5px solid var(--chalk-mut);border-radius:6px;background:transparent;cursor:pointer;color:#12281A;font-size:14px;line-height:1;font-weight:700}
 .order-row.done .order-check{background:var(--groen);border-color:var(--groen)}
 .order-info{flex:1;min-width:0}
 .order-info b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.order-info span{font-size:12px;color:var(--chalk-mut)}
-.stepper{display:flex;align-items:center;gap:0;flex:none}
+.order-info span{font-size:11.5px;color:var(--chalk-mut)}
+.dens{font-size:11.5px;margin-top:2px}
+.stepper{display:flex;align-items:center;flex:none}
 .stepper button{width:32px;height:32px;border:1px solid var(--line);background:var(--soil-3);color:var(--chalk);font-size:17px;cursor:pointer}
 .stepper button:first-child{border-radius:8px 0 0 8px}
 .stepper button:last-child{border-radius:0 8px 8px 0}
 .stepper .qty{width:48px;height:32px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;background:var(--soil-2)}
-.order-price{width:52px;text-align:right;font-size:13.5px;font-weight:600;flex:none}
-.totals{display:flex;justify-content:space-between;align-items:center;background:var(--soil-3);border-radius:12px;padding:14px;margin:14px 0}
-.totals b{font-family:Fraunces,serif;font-size:20px;font-weight:600}
-.totals span{font-size:12px;color:var(--chalk-dim);display:block}
+.order-price{width:48px;text-align:right;font-size:13.5px;font-weight:600;flex:none}
+.totals{background:var(--soil-3);border-radius:14px;padding:16px;margin:16px 0}
+.tot-row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--chalk-dim);padding:3px 0}
+.tot-row b{color:var(--chalk)}
+.tot-main{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.tot-main b{font-family:Fraunces,serif;font-size:24px;font-weight:600}
 .btn{width:100%;border:none;background:var(--chalk);color:var(--soil);border-radius:12px;padding:13px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--chalk-dim);margin-top:8px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--groen);color:#12281A;font-size:13.5px;font-weight:600;border-radius:999px;padding:9px 18px;opacity:0;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--groen);color:#12281A;font-size:13.5px;font-weight:600;border-radius:999px;padding:9px 18px;opacity:0;pointer-events:none;z-index:20}
 .toast.show{opacity:1}
 .hint{font-size:12.5px;color:var(--chalk-mut);margin-top:10px}
 .pane{display:none}.pane.on{display:block}
@@ -88,7 +113,7 @@ h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
 <header>
   <div class="eyebrow">Duffel · zandleem · avondzon vanaf 15u</div>
   <h1>Het bollenveld</h1>
-  <div class="sub">6 × 4 m · bloei januari tot juli</div>
+  <div class="sub">6 × 4 m = 24 m² · bloei januari tot juli</div>
 </header>
 
 <nav class="nav">
@@ -100,6 +125,9 @@ h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
 <section class="pane on" id="pane-plan">
   <h2>Kies je schikking</h2>
   <div id="opts"></div>
+  <h2>Veldcheck<small>dichtheid per zone, rekent live mee</small></h2>
+  <div class="check" id="veldcheck"></div>
+  <div class="legend"><span><i style="background:var(--groen)"></i>goed gevuld</span><span><i style="background:var(--geel)"></i>aan de ijle kant</span><span><i style="background:var(--rood)"></i>te dicht / te ijl</span></div>
   <h2>Bloeikalender</h2>
   <div class="cal" id="cal">
     <div class="cal-months"><span>jan</span><span>feb</span><span>mrt</span><span>apr</span><span>mei</span><span>jun</span><span>jul</span></div>
@@ -113,15 +141,19 @@ h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
 </section>
 
 <section class="pane" id="pane-bestel">
-  <h2>Bestellijst</h2>
+  <h2>Bestellijst<small>gegroepeerd per leverancier</small></h2>
   <div id="order"></div>
   <div class="totals">
-    <div><b id="tot-bollen">0</b><span>bollen</span></div>
-    <div style="text-align:right"><b id="tot-prijs">€0</b><span>richtprijs, ±15%</span></div>
+    <div class="tot-row"><span>Bollen</span><b id="t-bollen">0</b></div>
+    <div class="tot-row"><span>Gemiddeld over het veld</span><b id="t-dicht">0 /m²</b></div>
+    <div class="tot-row"><span>Plantgaten (sneeuwklokjes per pol)</span><b id="t-gaten">0</b></div>
+    <div class="tot-row"><span>Geschatte planttijd</span><b id="t-tijd">0 u</b></div>
+    <div class="tot-row"><span>Scherp zand westrand (2,5 cm)</span><b id="t-zand">0 L</b></div>
+    <div class="tot-main"><span style="font-size:13px;color:var(--chalk-dim)">Richtprijs totaal, ±15%</span><b id="t-prijs">€0</b></div>
   </div>
   <button class="btn" id="copy">Kopieer bestellijst</button>
   <button class="btn ghost" id="reset-qty">Zet aantallen terug op advies</button>
-  <div class="hint">Vink af wat besteld is. Sneeuwklokjes bestel je apart in januari–februari als "in the green"; de rest nu voor levering in september. Aantallen per soort aanpasbaar — prijzen rekenen automatisch mee.</div>
+  <div class="hint">Sneeuwklokjes zijn een aparte bestelling in januari — De Warande verzendt "in het groen" vanaf begin februari. Tulpen pas in november planten (koelere grond remt tulpenvuur en muizenvraat).</div>
 </section>
 
 </div>
@@ -129,49 +161,87 @@ h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
 
 <script>
 const SPECIES=[
- {id:"gal",naam:"Sneeuwklokje",lat:"Galanthus nivalis",wiki:"Galanthus_nivalis",n:300,unit:0.235,step:50,bloei:[1,2],diep:8,afst:8,kleur:"var(--wit)",bestelnote:"in the green, feb",note:"Kopen als 'in the green' in februari — droge bollen slaan slecht aan."},
- {id:"era",naam:"Winterakoniet",lat:"Eranthis hyemalis",wiki:"Eranthis_hyemalis",n:150,unit:0.235,step:50,bloei:[1,2,3],diep:5,afst:8,kleur:"var(--geel)",note:"Knolletjes 24u voorweken vóór het planten."},
- {id:"cro",naam:"Boerenkrokus",lat:"Crocus tommasinianus",wiki:"Crocus_tommasinianus",n:400,unit:0.14,step:50,bloei:[2,3],diep:8,afst:8,kleur:"var(--paars)"},
- {id:"iri",naam:"Netiris",lat:"Iris reticulata",wiki:"Iris_reticulata",n:100,unit:0.18,step:25,bloei:[2,3],diep:9,afst:10,kleur:"var(--blauw)",note:"Droogste plek, scherp zand eronder."},
- {id:"nar",naam:"Narcis",lat:"Narcissus, vroeg + laat",wiki:"Narcissus_(plant)",n:200,unit:0.33,step:50,bloei:[3,4],diep:14,afst:12,kleur:"var(--geel)"},
- {id:"mus",naam:"Blauwe druifjes",lat:"Muscari armeniacum",wiki:"Muscari_armeniacum",n:250,unit:0.12,step:50,bloei:[4,5],diep:8,afst:8,kleur:"var(--blauw)"},
- {id:"tul",naam:"Tulp",lat:"Tulipa, vroeg/Triumph/laat",wiki:"Tulip",n:250,unit:0.32,step:50,bloei:[4,5],diep:14,afst:12,kleur:"var(--roze)",note:"Scherp zand onder de bol; komt in zandleem 2–3 jaar terug."},
- {id:"bos",naam:"Boshyacint",lat:"Hyacinthoides non-scripta",wiki:"Hyacinthoides_non-scripta",n:150,unit:0.34,step:25,bloei:[4,5],diep:10,afst:10,kleur:"var(--paars)"},
- {id:"aps",naam:"Sierui",lat:"Allium 'Purple Sensation'",wiki:"Allium_hollandicum",n:80,unit:0.56,step:10,bloei:[5,6],diep:12,afst:20,kleur:"var(--paars)"},
- {id:"cam",naam:"Camassia",lat:"Camassia leichtlinii",wiki:"Camassia",n:60,unit:0.92,step:10,bloei:[5,6],diep:12,afst:20,kleur:"var(--blauw)",note:"In het laagste, natste punt — verdraagt dat als enige."},
- {id:"asp",naam:"Trommelstokjes",lat:"Allium sphaerocephalon",wiki:"Allium_sphaerocephalon",n:100,unit:0.15,step:25,bloei:[6,7],diep:8,afst:8,kleur:"var(--roze)"}
+ {id:"gal",naam:"Sneeuwklokje",lat:"Galanthus nivalis",wiki:"Galanthus_nivalis",n:300,unit:0.235,step:50,bloei:[1,2],diep:8,afst:8,kleur:"var(--wit)",sup:"jan",rate:300,note:"Kopen als 'in het groen' — plant in polletjes van 3–5."},
+ {id:"era",naam:"Winterakoniet",lat:"Eranthis hyemalis",wiki:"Eranthis_hyemalis",n:150,unit:0.235,step:50,bloei:[1,2,3],diep:5,afst:8,kleur:"var(--geel)",sup:"war",rate:200,note:"Knolletjes 24u voorweken vóór het planten."},
+ {id:"cro",naam:"Boerenkrokus",lat:"Crocus tommasinianus",wiki:"Crocus_tommasinianus",n:400,unit:0.14,step:50,bloei:[2,3],diep:8,afst:8,kleur:"var(--paars)",sup:"war",rate:200},
+ {id:"iri",naam:"Netiris",lat:"Iris reticulata",wiki:"Iris_reticulata",n:100,unit:0.18,step:25,bloei:[2,3],diep:9,afst:10,kleur:"var(--blauw)",sup:"bul",rate:200,note:"Droogste plek, scherp zand eronder."},
+ {id:"nar",naam:"Narcis",lat:"Narcissus, vroeg + laat",wiki:"Narcissus_(plant)",n:200,unit:0.33,step:50,bloei:[3,4],diep:14,afst:12,kleur:"var(--geel)",sup:"war",rate:120},
+ {id:"mus",naam:"Blauwe druifjes",lat:"Muscari armeniacum",wiki:"Muscari_armeniacum",n:250,unit:0.12,step:50,bloei:[4,5],diep:8,afst:8,kleur:"var(--blauw)",sup:"war",rate:200},
+ {id:"tul",naam:"Tulp",lat:"Tulipa, vroeg/Triumph/laat",wiki:"Tulip",n:250,unit:0.32,step:50,bloei:[4,5],diep:14,afst:12,kleur:"var(--roze)",sup:"bul",rate:120,note:"Scherp zand onder de bol; komt in zandleem 2–3 jaar terug."},
+ {id:"bos",naam:"Boshyacint",lat:"Hyacinthoides non-scripta",wiki:"Hyacinthoides_non-scripta",n:150,unit:0.34,step:25,bloei:[4,5],diep:10,afst:10,kleur:"var(--paars)",sup:"eco",rate:200,note:"Echte non-scripta — geen Spaanse hispanica."},
+ {id:"aps",naam:"Sierui",lat:"Allium 'Purple Sensation'",wiki:"Allium_hollandicum",n:80,unit:0.56,step:10,bloei:[5,6],diep:12,afst:20,kleur:"var(--paars)",sup:"bul",rate:120},
+ {id:"cam",naam:"Camassia",lat:"Camassia leichtlinii",wiki:"Camassia",n:60,unit:0.92,step:10,bloei:[5,6],diep:12,afst:20,kleur:"var(--blauw)",sup:"war",rate:120,note:"In het laagste, natste punt — verdraagt dat als enige."},
+ {id:"asp",naam:"Trommelstokjes",lat:"Allium sphaerocephalon",wiki:"Allium_sphaerocephalon",n:100,unit:0.15,step:25,bloei:[6,7],diep:8,afst:8,kleur:"var(--roze)",sup:"war",rate:200}
 ];
-const EXTRA={id:"zand",naam:"Scherp zand",sub:"3–4 zakken, onder tulp en iris",prijs:15};
-
+const SUPS={
+ war:{naam:"De Warande · sterkebollen.nl",sub:"bestellen nu, levering september"},
+ bul:{naam:"Bulbi.nl",sub:"bestellen nu, levering september–oktober"},
+ eco:{naam:"Ecoflora (Halle)",sub:"bestellen vanaf juni, levering vanaf september"},
+ jan:{naam:"De Warande · in het groen",sub:"aparte bestelling in januari, levering vanaf begin februari"},
+ mat:{naam:"Bouwhandel",sub:"scherp zand, zakken 25 kg"}
+};
 const ARR={
- stroken:{
-  titel:"Stroken",
-  pro:[["Planten","<b>makkelijkst</b> — soort per soort"],["Beeld","strak, duidelijke golven"],["Onderhoud","gericht maaien per strook"]],
-  plek:{gal:"strook D (oost)",era:"strook D (oost)",cro:"strook C + onderlaag A/B",iri:"strook A (west, droog)",nar:"strook B",mus:"strook C",tul:"strook A (west, droog)",bos:"strook D (oost)",aps:"strook B",cam:"strook C, natste punt",asp:"strook A (west)"}
- },
- drifts:{
-  titel:"Drifts",
-  pro:[["Planten","gemiddeld — vlekken uitzetten"],["Beeld","<b>natuurlijkst</b>, golvende eilanden"],["Onderhoud","maaien rond de vlekken"]],
-  plek:{gal:"3 vlekken langs oostrand",era:"tussen de sneeuwklokjes",cro:"matrix door het hele veld",iri:"droge westpunt",nar:"2 grote drifts in het midden",mus:"linten tussen de drifts",tul:"band langs westrand",bos:"oosthoeken",aps:"verspreid door het midden",cam:"natste kom",asp:"westrand, tussen de tulpen"}
- },
- stinzen:{
-  titel:"Stinzenweide",
+ stroken:{titel:"Stroken",tf:1.0,zandM2:6,
+  pro:[["Planten","<b>makkelijkst</b> — soort per soort in sleuven"],["Beeld","strak, duidelijke golven"],["Onderhoud","gericht maaien per strook"]],
+  plek:{gal:"strook D (oost)",era:"strook D (oost)",cro:"strook C + onderlaag A/B",iri:"strook A (west, droog)",nar:"strook B",mus:"strook C",tul:"strook A (west, droog)",bos:"strook D (oost)",aps:"strook B",cam:"strook C, natste punt",asp:"strook A (west)"},
+  zones:[
+   {naam:"Strook A · west",m2:6,ids:["tul","iri","asp"]},
+   {naam:"Strook B",m2:6,ids:["nar","aps"]},
+   {naam:"Strook C",m2:6,ids:["cro","mus","cam"]},
+   {naam:"Strook D · oost",m2:6,ids:["gal","era","bos"]}],
+  stappen:["<b>Strook A eerst:</b> sleuf op 15 cm, 2,5 cm scherp zand op de bodem, tulpen erop, half dichten, iris en trommelstokjes op 8–9 cm erboven (lasagne), dichten.","<b>Strook B:</b> zelfde principe — narcis op 14 cm, sierui op 12 cm, eventueel krokus als toplaag op 8 cm.","<b>Strook C:</b> krokus en muscari op 8 cm; camassia op 12 cm in het laagste punt.","<b>Strook D:</b> akoniet (voorgeweekt) op 5 cm, boshyacint op 10 cm; sneeuwklokjes prik je er in februari in het groen tussen.","<b>Tijd:</b> een namiddag per strook, een weekend in totaal. Tulpen pas in november."]},
+ drifts:{titel:"Drifts",tf:1.25,zandM2:3,
+  pro:[["Planten","meeste werk — vlekken uitzetten"],["Beeld","<b>natuurlijkst</b>, golvende eilanden"],["Onderhoud","maaien rond de vlekken"]],
+  plek:{gal:"3 vlekken langs oostrand",era:"tussen de sneeuwklokjes",cro:"matrix door het hele veld",iri:"droge westpunt",nar:"2 grote drifts in het midden",mus:"linten tussen de drifts",tul:"band langs westrand",bos:"oosthoeken",aps:"verspreid door het midden",cam:"natste kom",asp:"westrand, tussen de tulpen"},
+  zones:[
+   {naam:"Westband · droog + zand",m2:3,ids:["tul","iri","asp"]},
+   {naam:"Middenveld · drifts",m2:9,ids:["nar","aps","mus"]},
+   {naam:"Krokusmatrix · hele veld",m2:24,ids:["cro"]},
+   {naam:"Natte kom",m2:1,ids:["cam"]},
+   {naam:"Oostrand · vlekken",m2:7,ids:["gal","era","bos"]}],
+  stappen:["<b>Vormen uitzetten</b> met tuinslang of touw: druppel- en niervormen, punten naar het westen (kijkrichting).","<b>Per vlek:</b> zode afsteken of bollenplanter, 5–9 bollen per gat in onregelmatige groepjes; vlekranden laten overvloeien.","<b>Krokus niet in een vlek</b> maar over het hele veld strooien als verbindende matrix — planten waar hij valt.","<b>Westband:</b> tulp, iris en trommelstokjes op scherp zand; camassia in de kom.","<b>Tijd:</b> drie tot vier dagdelen. Mooiste jaar-één-beeld, maar het enige schema waarin je compositiefouten kunt maken."]},
+ stinzen:{titel:"Stinzenweide",tf:0.8,zandM2:3,
   pro:[["Planten","<b>minste werk</b> — strooien en planten waar ze vallen"],["Beeld","gemengd tapijt, elk jaar wilder"],["Onderhoud","één keer maaien, half juni"]],
-  plek:{gal:"gemengd uitstrooien",era:"gemengd uitstrooien",cro:"gemengd uitstrooien",iri:"apart: droge westrand",nar:"gemengd uitstrooien",mus:"gemengd uitstrooien",tul:"apart: droge westrand",bos:"gemengd, iets meer oost",aps:"gemengd uitstrooien",cam:"apart: natste kom",asp:"apart: droge westrand"}
- }
+  plek:{gal:"gemengd uitstrooien",era:"gemengd uitstrooien",cro:"gemengd uitstrooien",iri:"apart: droge westrand",nar:"gemengd uitstrooien",mus:"gemengd uitstrooien",tul:"apart: droge westrand",bos:"gemengd, iets meer oost",aps:"gemengd uitstrooien",cam:"apart: natste kom",asp:"apart: droge westrand"},
+  zones:[
+   {naam:"Westrand · droog + zand",m2:3,ids:["tul","iri","asp"]},
+   {naam:"Gemengd tapijt",m2:20,ids:["gal","era","cro","nar","mus","bos","aps"]},
+   {naam:"Natte kom",m2:1,ids:["cam"]}],
+  stappen:["<b>Ronde één, de diepe soorten:</b> narcis en sierui gemengd in een emmer, met een boog uitstrooien over het middenveld — planten exact waar elke bol valt, niet herschikken.","<b>Ronde twee, de ondiepe:</b> krokus, muscari, akoniet (24u voorgeweekt) en boshyacint gemengd, zelfde techniek.","<b>Apart blijven:</b> tulp, iris en trommelstokjes op de droge westrand op zand; camassia in de natte kom.","<b>Februari:</b> sneeuwklokjes in het groen ertussen prikken, in polletjes van 3–5.","<b>Tijd:</b> met twee is dit een zaterdag. Maaien: één keer, half juni."]}
 };
 const PREV={
  stroken:`<svg viewBox="0 0 120 84"><rect x="8" y="8" width="24" height="68" rx="4" fill="var(--roze)" opacity=".8"/><rect x="36" y="8" width="24" height="68" rx="4" fill="var(--geel)" opacity=".8"/><rect x="64" y="8" width="24" height="68" rx="4" fill="var(--blauw)" opacity=".8"/><rect x="92" y="8" width="20" height="68" rx="4" fill="var(--paars)" opacity=".8"/></svg>`,
  drifts:`<svg viewBox="0 0 120 84"><rect x="8" y="8" width="14" height="68" rx="4" fill="var(--roze)" opacity=".8"/><ellipse cx="52" cy="30" rx="20" ry="13" fill="var(--geel)" opacity=".8"/><ellipse cx="72" cy="58" rx="22" ry="13" fill="var(--geel)" opacity=".6"/><ellipse cx="100" cy="24" rx="13" ry="10" fill="var(--wit)" opacity=".85"/><ellipse cx="103" cy="62" rx="12" ry="10" fill="var(--paars)" opacity=".8"/><ellipse cx="38" cy="62" rx="13" ry="9" fill="var(--blauw)" opacity=".8"/></svg>`,
  stinzen:`<svg viewBox="0 0 120 84"><rect x="8" y="8" width="12" height="68" rx="4" fill="var(--roze)" opacity=".8"/><g opacity=".9"><circle cx="34" cy="18" r="3" fill="var(--geel)"/><circle cx="52" cy="26" r="3" fill="var(--paars)"/><circle cx="70" cy="15" r="3" fill="var(--wit)"/><circle cx="90" cy="24" r="3" fill="var(--blauw)"/><circle cx="106" cy="14" r="3" fill="var(--paars)"/><circle cx="40" cy="42" r="3" fill="var(--blauw)"/><circle cx="60" cy="50" r="3" fill="var(--geel)"/><circle cx="80" cy="40" r="3" fill="var(--paars)"/><circle cx="100" cy="48" r="3" fill="var(--wit)"/><circle cx="30" cy="66" r="3" fill="var(--paars)"/><circle cx="52" cy="70" r="3" fill="var(--wit)"/><circle cx="74" cy="64" r="3" fill="var(--blauw)"/><circle cx="94" cy="70" r="3" fill="var(--geel)"/></g></svg>`
 };
-
-const KEY="bollenveld-v2";
-let S={arr:"stroken",qty:{},done:{},st:{}};
+const KEY="bollenveld-v3";
+let S={arr:"stinzen",qty:{},done:{},st:{}};
 SPECIES.forEach(s=>S.qty[s.id]=s.n);
 const eur=v=>"€"+Math.round(v);
+const sp=id=>SPECIES.find(s=>s.id===id);
 
-/* nav */
+/* --- rekenwerk --- */
+function zand(){const L=Math.round(ARR[S.arr].zandM2*25);return{L,zakken:Math.ceil(L/15),prijs:Math.ceil(L/15)*4.5};}
+function calc(){
+  const bollen=SPECIES.reduce((a,s)=>a+S.qty[s.id],0);
+  const gaten=SPECIES.reduce((a,s)=>a+(s.id==="gal"?Math.ceil(S.qty[s.id]/4):S.qty[s.id]),0);
+  const uren=SPECIES.reduce((a,s)=>a+S.qty[s.id]/s.rate,0)*ARR[S.arr].tf;
+  const z=zand();
+  const prijs=SPECIES.reduce((a,s)=>a+S.qty[s.id]*s.unit,0)+z.prijs;
+  return{bollen,gaten,uren,z,prijs,dicht:bollen/24};
+}
+function zoneStats(zo){
+  const tot=zo.ids.reduce((a,id)=>a+S.qty[id],0);
+  const dflt=zo.ids.reduce((a,id)=>a+sp(id).n,0);
+  const dens=tot/zo.m2, ratio=dflt?tot/dflt:1;
+  let kleur="var(--groen)",label="goed gevuld";
+  if(ratio<0.4||ratio>1.8){kleur="var(--rood)";label=ratio<0.4?"te ijl":"te dicht";}
+  else if(ratio<0.7){kleur="var(--geel)";label="aan de ijle kant";}
+  else if(ratio>1.4){kleur="var(--geel)";label="vol — kan nog net";}
+  return{tot,dens,kleur,label};
+}
+
+/* --- nav --- */
 document.querySelectorAll(".nav button").forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on"));
@@ -181,20 +251,34 @@ document.querySelectorAll(".nav button").forEach(b=>{
   };
 });
 
-/* schikkingen */
+/* --- schikking + veldcheck --- */
 function renderOpts(){
   const w=document.getElementById("opts");w.innerHTML="";
   Object.entries(ARR).forEach(([k,a])=>{
     const d=document.createElement("div");
     d.className="opt"+(S.arr===k?" on":"");
     d.innerHTML=`<div class="opt-head"><h3>${a.titel}</h3>${S.arr===k?'<span class="badge">gekozen</span>':""}</div>
-      <div class="opt-body">${PREV[k]}<ul>${a.pro.map(p=>`<li>${p[0]}: ${p[1]}</li>`).join("")}</ul></div>`;
-    d.onclick=()=>{S.arr=k;save();renderOpts();renderCards();};
+      <div class="opt-body">${PREV[k]}<ul>${a.pro.map(p=>`<li>${p[0]}: ${p[1]}</li>`).join("")}</ul></div>
+      <details><summary>Plantinstructie</summary><ol>${a.stappen.map(s=>`<li>${s}</li>`).join("")}</ol></details>`;
+    const kies=()=>{S.arr=k;save();renderOpts();renderCheck();renderCards();renderOrder();};
+    d.querySelector(".opt-head").onclick=kies;
+    d.querySelector(".opt-body").onclick=kies;
     w.appendChild(d);
   });
 }
+function renderCheck(){
+  const w=document.getElementById("veldcheck");w.innerHTML="";
+  ARR[S.arr].zones.forEach(zo=>{
+    const st=zoneStats(zo);
+    const r=document.createElement("div");r.className="zone";
+    r.innerHTML=`<span class="dot" style="background:${st.kleur}"></span>
+      <div class="zone-info"><b>${zo.naam}</b><span>${zo.ids.map(id=>sp(id).naam.toLowerCase()).join(", ")} · ${zo.m2} m² · ${st.label}</span></div>
+      <div class="zone-num"><b>${Math.round(st.dens)}</b><span>bollen/m²</span></div>`;
+    w.appendChild(r);
+  });
+}
 
-/* kalender */
+/* --- kalender --- */
 const cal=document.getElementById("cal");
 SPECIES.forEach(s=>{
   const row=document.createElement("div");row.className="cal-row";
@@ -202,7 +286,7 @@ SPECIES.forEach(s=>{
   cal.appendChild(row);
 });
 
-/* soorten */
+/* --- soorten --- */
 function placeholder(k){return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="${k}"/><circle cx="15" cy="24" r="6" fill="${k}" opacity=".7"/><circle cx="33" cy="24" r="6" fill="${k}" opacity=".7"/><rect x="22.5" y="26" width="3" height="16" rx="1.5" fill="#6FB98A"/></svg>`;}
 async function foto(s,el){
   for(const w of ["nl","en"]){
@@ -220,16 +304,17 @@ async function foto(s,el){
   }
 }
 function renderCards(){
-  document.getElementById("soorten-hint").textContent="Plek volgens gekozen schikking: "+ARR[S.arr].titel.toLowerCase()+".";
+  document.getElementById("soorten-hint").textContent="Plek volgens gekozen schikking: "+ARR[S.arr].titel.toLowerCase()+". Vuistregel diepte: 2–3× de bolhoogte.";
   const w=document.getElementById("cards");w.innerHTML="";
   SPECIES.forEach(s=>{
     const st=S.st[s.id]||{};
+    const perM2=Math.round(10000/(s.afst*s.afst));
     const c=document.createElement("div");c.className="card";
     c.innerHTML=`<div class="ph" id="ph-${s.id}">${placeholder(s.kleur)}</div>
       <div style="flex:1;min-width:0">
         <h3>${s.naam}</h3><div class="lat">${s.lat}</div>
         <div class="plek">→ ${ARR[S.arr].plek[s.id]}</div>
-        <div class="meta"><span><b>${S.qty[s.id]}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span></div>
+        <div class="meta"><span><b>${S.qty[s.id]}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>max <b>${perM2}</b>/m²</span></div>
         <div class="chips"><button class="chip ${st.planted?"on":""}" data-id="${s.id}">${st.planted?"✓ geplant":"geplant"}</button></div>
         ${s.note?`<div class="note">${s.note}</div>`:""}
       </div>`;
@@ -246,44 +331,66 @@ function renderCards(){
   });
 }
 
-/* bestellijst */
+/* --- bestellijst --- */
+function zoneOf(id){return ARR[S.arr].zones.find(z=>z.ids.includes(id));}
 function renderOrder(){
   const w=document.getElementById("order");w.innerHTML="";
-  SPECIES.forEach(s=>{
-    const row=document.createElement("div");
-    row.className="order-row"+(S.done[s.id]?" done":"");
-    row.innerHTML=`<button class="order-check" aria-label="besteld">${S.done[s.id]?"✓":""}</button>
-      <div class="order-info"><b>${s.naam}</b><span>${s.bestelnote||s.lat}</span></div>
-      <div class="stepper"><button aria-label="minder">−</button><div class="qty">${S.qty[s.id]}</div><button aria-label="meer">+</button></div>
-      <div class="order-price">${eur(S.qty[s.id]*s.unit)}</div>`;
-    const [check]=row.querySelectorAll(".order-check");
-    const [minus,plus]=row.querySelectorAll(".stepper button");
-    check.onclick=()=>{S.done[s.id]=!S.done[s.id];save();renderOrder();};
-    minus.onclick=()=>{S.qty[s.id]=Math.max(0,S.qty[s.id]-s.step);save();renderOrder();renderCards();};
-    plus.onclick=()=>{S.qty[s.id]=S.qty[s.id]+s.step;save();renderOrder();renderCards();};
-    w.appendChild(row);
+  ["war","bul","eco","jan","mat"].forEach(g=>{
+    const items=SPECIES.filter(s=>s.sup===g);
+    if(g!=="mat"&&!items.length)return;
+    const sub=g==="mat"?zand().prijs:items.reduce((a,s)=>a+S.qty[s.id]*s.unit,0);
+    const h=document.createElement("div");h.className="grp";
+    h.innerHTML=`<span>${SUPS[g].naam}<br><span style="text-transform:none;letter-spacing:0">${SUPS[g].sub}</span></span><b>${eur(sub)}</b>`;
+    w.appendChild(h);
+    items.forEach(s=>{
+      const zo=zoneOf(s.id),zs=zo?zoneStats(zo):null;
+      const row=document.createElement("div");
+      row.className="order-row"+(S.done[s.id]?" done":"");
+      row.innerHTML=`<button class="order-check" aria-label="besteld">${S.done[s.id]?"✓":""}</button>
+        <div class="order-info"><b>${s.naam}</b><span>${s.lat}</span>
+          ${zs?`<div class="dens" style="color:${zs.kleur}">${zo.naam.toLowerCase()}: ${Math.round(zs.dens)}/m² · ${zs.label}</div>`:""}</div>
+        <div class="stepper"><button aria-label="minder">−</button><div class="qty">${S.qty[s.id]}</div><button aria-label="meer">+</button></div>
+        <div class="order-price">${eur(S.qty[s.id]*s.unit)}</div>`;
+      row.querySelector(".order-check").onclick=()=>{S.done[s.id]=!S.done[s.id];save();renderOrder();};
+      const [minus,plus]=row.querySelectorAll(".stepper button");
+      minus.onclick=()=>{S.qty[s.id]=Math.max(0,S.qty[s.id]-s.step);save();refresh();};
+      plus.onclick=()=>{S.qty[s.id]+=s.step;save();refresh();};
+      w.appendChild(row);
+    });
+    if(g==="mat"){
+      const z=zand();
+      const row=document.createElement("div");
+      row.className="order-row"+(S.done.zand?" done":"");
+      row.innerHTML=`<button class="order-check">${S.done.zand?"✓":""}</button>
+        <div class="order-info"><b>Scherp zand</b><span>${z.zakken} zakken van 25 kg · ${z.L} L voor ${ARR[S.arr].zandM2} m² westrand</span></div>
+        <div class="order-price">${eur(z.prijs)}</div>`;
+      row.querySelector(".order-check").onclick=()=>{S.done.zand=!S.done.zand;save();renderOrder();};
+      w.appendChild(row);
+    }
   });
-  const z=document.createElement("div");
-  z.className="order-row"+(S.done.zand?" done":"");
-  z.innerHTML=`<button class="order-check">${S.done.zand?"✓":""}</button>
-    <div class="order-info"><b>${EXTRA.naam}</b><span>${EXTRA.sub}</span></div>
-    <div class="order-price">${eur(EXTRA.prijs)}</div>`;
-  z.querySelector(".order-check").onclick=()=>{S.done.zand=!S.done.zand;save();renderOrder();};
-  w.appendChild(z);
-  const bollen=SPECIES.reduce((a,s)=>a+S.qty[s.id],0);
-  const prijs=SPECIES.reduce((a,s)=>a+S.qty[s.id]*s.unit,0)+EXTRA.prijs;
-  document.getElementById("tot-bollen").textContent=bollen.toLocaleString("nl-BE");
-  document.getElementById("tot-prijs").textContent=eur(prijs);
+  const c=calc();
+  document.getElementById("t-bollen").textContent=c.bollen.toLocaleString("nl-BE");
+  document.getElementById("t-dicht").textContent=Math.round(c.dicht)+" /m²";
+  document.getElementById("t-gaten").textContent=c.gaten.toLocaleString("nl-BE");
+  document.getElementById("t-tijd").textContent=(Math.round(c.uren*2)/2).toLocaleString("nl-BE")+" u";
+  document.getElementById("t-zand").textContent=c.z.L+" L · "+c.z.zakken+" zakken";
+  document.getElementById("t-prijs").textContent=eur(c.prijs);
 }
+function refresh(){renderOrder();renderCheck();renderCards();}
+
 function orderText(){
-  const lines=["Bestellijst bollenveld 6×4 m (Duffel)","Schikking: "+ARR[S.arr].titel,""];
-  SPECIES.forEach(s=>{
-    if(S.qty[s.id]>0)lines.push(`${S.qty[s.id]} × ${s.lat}${s.bestelnote?" ("+s.bestelnote+")":""} — ${eur(S.qty[s.id]*s.unit)}`);
+  const c=calc(),lines=["Bestellijst bollenveld 6×4 m (Duffel) — schikking: "+ARR[S.arr].titel,""];
+  ["war","bul","eco","jan"].forEach(g=>{
+    const items=SPECIES.filter(s=>s.sup===g&&S.qty[s.id]>0);
+    if(!items.length)return;
+    lines.push(SUPS[g].naam+" ("+SUPS[g].sub+"):");
+    items.forEach(s=>lines.push(`  ${S.qty[s.id]} × ${s.lat} — ${eur(S.qty[s.id]*s.unit)}`));
+    lines.push("");
   });
-  lines.push(`${EXTRA.naam}, ${EXTRA.sub} — ${eur(EXTRA.prijs)}`);
-  const bollen=SPECIES.reduce((a,s)=>a+S.qty[s.id],0);
-  const prijs=SPECIES.reduce((a,s)=>a+S.qty[s.id]*s.unit,0)+EXTRA.prijs;
-  lines.push("",`Totaal: ${bollen} bollen — ±${eur(prijs)}`);
+  const z=zand();
+  lines.push(`Bouwhandel: ${z.zakken} zakken scherp zand (25 kg) — ${eur(z.prijs)}`,"",
+    `Totaal: ${c.bollen} bollen (${Math.round(c.dicht)}/m²) — ±${eur(c.prijs)}`,
+    `Planttijd geschat: ${Math.round(c.uren*2)/2} uur, ${c.gaten} plantgaten`);
   return lines.join("\n");
 }
 document.getElementById("copy").onclick=async()=>{
@@ -296,11 +403,9 @@ document.getElementById("copy").onclick=async()=>{
   const toast=document.getElementById("toast");
   toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1600);
 };
-document.getElementById("reset-qty").onclick=()=>{
-  SPECIES.forEach(s=>S.qty[s.id]=s.n);save();renderOrder();renderCards();
-};
+document.getElementById("reset-qty").onclick=()=>{SPECIES.forEach(s=>S.qty[s.id]=s.n);save();refresh();};
 
-/* storage */
+/* --- storage --- */
 async function save(){
   try{if(window.storage)await window.storage.set(KEY,JSON.stringify(S));
   else localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
@@ -313,7 +418,7 @@ async function load(){
     if(v){const p=JSON.parse(v);S={...S,...p,qty:{...S.qty,...p.qty}};}
   }catch(e){}
 }
-(async()=>{await load();renderOpts();renderCards();renderOrder();})();
+(async()=>{await load();renderOpts();renderCheck();renderCards();renderOrder();})();
 </script>
 </body>
 </html>
