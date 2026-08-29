@@ -179,6 +179,8 @@ details li b{color:var(--chalk)}
   <div class="pal-h">Bovenlaag · 5–10 cm · komt bovenop</div>
   <div class="palette" id="palette-o"></div>
   <div class="binfo" id="binfo"></div>
+  <div class="pal-h">Voorbeeld laden — zet een schikking in het raster, daarna vrij bij te tekenen</div>
+  <div class="scrub" id="vbrow"></div>
   <div class="scrub" id="laagview"></div>
   <div class="gridbox">
     <div class="gridlbl"><span>← west (avondzon)</span><span>oost →</span></div>
@@ -730,6 +732,59 @@ document.getElementById("copy").onclick=async()=>{
 };
 document.getElementById("reset-qty").onclick=()=>{active().forEach(s=>S.qty[s.id]=s.n);save();refresh();};
 
+/* --- voorbeeldschikkingen in het raster --- */
+function vbStroken(){
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c;
+    if(c<3){d[i]="tul";o[i]=r<4?"iri":"asp";}
+    else if(c<6){d[i]="nar";o[i]="cro";}
+    else if(c<9){if(r>=6)d[i]="cam";o[i]=r<4?"cro":"mus";}
+    else{o[i]=r<3?"gal":(r<6?"era":"bos");}
+  }
+  return{d,o};
+}
+function vbDrifts(){
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  const zet=(laag,cells,id)=>cells.forEach(([r,c])=>{(laag==="d"?d:o)[r*COLS+c]=id;});
+  for(let r=0;r<ROWS;r++){d[r*COLS]="tul";d[r*COLS+1]="tul";const v=r<4?"iri":"asp";o[r*COLS]=v;o[r*COLS+1]=v;}
+  zet("d",[[1,3],[1,4],[2,3],[2,4],[2,5],[3,4],[3,5],[5,4],[5,5],[6,3],[6,4],[6,5],[7,4]],"nar");
+  zet("d",[[0,6],[3,7],[5,7],[1,8]],"aps");
+  zet("d",[[6,7],[6,8],[7,7],[7,8]],"cam");
+  zet("o",[[4,3],[4,4],[4,5],[4,6],[3,6],[5,6]],"mus");
+  for(let r=0;r<ROWS;r++)for(let c=2;c<9;c++){const i=r*COLS+c;if(!o[i])o[i]="cro";}
+  for(let r=0;r<ROWS;r++)for(let c=9;c<COLS;c++){o[r*COLS+c]=r<3?"gal":(r<5?"era":"bos");}
+  return{d,o};
+}
+function vbStinzen(){
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  const mix=["cro","gal","era","mus","cro","bos","gal","cro","era","mus","cro","bos","gal"];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c;
+    if(c<2){d[i]="tul";o[i]=r<4?"iri":"asp";continue;}
+    if(r>=6&&c>=6&&c<8){d[i]="cam";o[i]="cro";continue;}
+    o[i]=mix[(i*5)%13];
+    if((r+c)%3===0)d[i]="nar";
+    else if((i*7)%11===0)d[i]="aps";
+  }
+  return{d,o};
+}
+function renderVB(){
+  const w=document.getElementById("vbrow");if(!w)return;w.innerHTML="";
+  [["stroken","Stroken",vbStroken],["drifts","Drifts",vbDrifts],["stinzen","Stinzenweide",vbStinzen]].forEach(([k,lbl,fn])=>{
+    const b=document.createElement("button");
+    b.textContent=lbl;
+    b.onclick=()=>{
+      const vol=S.gd.d.some(Boolean)||S.gd.o.some(Boolean);
+      if(vol&&!confirm("Dit overschrijft je huidige tekening. Doorgaan? (Tip: bewaar ze eerst hieronder.)"))return;
+      S.gd=fn();save();paintGrid();renderDStats();renderBloeiInfo();
+      if(S.arr==="vrij"){renderCheck();renderCards();}
+      melding("Voorbeeld "+lbl.toLowerCase()+" geladen");
+    };
+    w.appendChild(b);
+  });
+}
+
 /* --- bewaarde ontwerpen --- */
 function renderSaves(){
   const w=document.getElementById("saves");if(!w)return;w.innerHTML="";
@@ -805,7 +860,7 @@ async function load(){
       delete S.grid;}
   }catch(e){}
 }
-(async()=>{await load();buildGrid();renderScrub();renderLaagview();refresh();renderSaves();})();
+(async()=>{await load();buildGrid();renderScrub();renderLaagview();renderVB();refresh();renderSaves();})();
 </script>
 </body>
 </html>
