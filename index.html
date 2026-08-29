@@ -71,6 +71,11 @@ details li b{color:var(--chalk)}
 .ds-row i{width:10px;height:10px;border-radius:50%;flex:none}
 .ds-row .n{flex:1}
 .ds-row b{font-variant-numeric:tabular-nums}
+.scrub{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:10px 0 2px}
+.scrub button{flex:none;border:1px solid var(--line);background:var(--soil-2);color:var(--chalk-dim);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+.scrub button.on{background:var(--geel);color:#241C08;border-color:var(--geel);font-weight:600}
+.bloei-info{font-size:12.5px;color:var(--chalk-dim);margin:4px 2px 0;min-height:18px}
+.pal small{color:var(--chalk-mut);font-weight:400;font-size:10.5px}
 /* kalender */
 .cal{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px}
 .cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
@@ -159,16 +164,18 @@ details li b{color:var(--chalk)}
 </section>
 
 <section class="pane" id="pane-ontwerp">
-  <h2>Vrij ontwerp<small>elke cel is 50 × 50 cm</small></h2>
+  <h2>Vrij ontwerp<small>elke cel is 50 × 50 cm · twee lagen</small></h2>
   <div class="palette" id="palette"></div>
   <div class="gridbox">
     <div class="gridlbl"><span>← west (avondzon)</span><span>oost →</span></div>
     <div id="grid"></div>
   </div>
+  <div class="scrub" id="scrub"></div>
+  <div class="bloei-info" id="bloei-info"></div>
   <div class="design-stats check" id="dstats" style="margin-top:14px;padding:10px 14px"></div>
   <button class="btn" id="apply-design">Neem ontwerp over in bestellijst</button>
   <button class="btn ghost" id="clear-design">Ontwerp wissen</button>
-  <div class="hint">Kies een soort en veeg over het raster. Het advies-aantal per soort volgt uit de geverfde oppervlakte × de plantdichtheid van die soort. "Overnemen" zet de aantallen in de bestellijst en schakelt de schikking op Vrij ontwerp.</div>
+  <div class="hint">Alle soorten — ook de alternatieven — staan in het palet; teken je een alternatief, dan komt het vanzelf in het plan. Diepe soorten (≥ 12 cm: tulp, narcis, sierui, camassia, dichtersnarcis, honinglook) en ondiepe liggen in twee lagen: krokus óver tulpen tekenen mag dus (lasagne), de cel kleurt dan tweeledig. Tik een maand boven de statistieken om te zien wat er dan bloeit. "Overnemen" zet de advies-aantallen (geverfde m² × dichtheid) in de bestellijst.</div>
 </section>
 
 <section class="pane" id="pane-soorten">
@@ -272,7 +279,7 @@ const PREV={
  vrij:`<svg viewBox="0 0 120 84"><g opacity=".9"><rect x="10" y="10" width="18" height="18" rx="3" fill="var(--roze)"/><rect x="30" y="10" width="18" height="18" rx="3" fill="var(--roze)" opacity=".6"/><rect x="50" y="22" width="18" height="18" rx="3" fill="var(--geel)"/><rect x="70" y="10" width="18" height="18" rx="3" fill="var(--blauw)"/><rect x="90" y="30" width="18" height="18" rx="3" fill="var(--paars)"/><rect x="30" y="48" width="18" height="18" rx="3" fill="var(--blauw)" opacity=".7"/><rect x="60" y="56" width="18" height="18" rx="3" fill="var(--wit)"/><rect x="90" y="56" width="18" height="18" rx="3" fill="var(--geel)" opacity=".7"/></g></svg>`
 };
 const KEY="bollenveld-v4",COLS=12,ROWS=8,CELL=0.25;
-let S={arr:"stinzen",qty:{},done:{},st:{},plan:{},grid:Array(COLS*ROWS).fill(null)};
+let S={arr:"stinzen",qty:{},done:{},st:{},plan:{},gd:{d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)}};
 SPECIES.forEach(s=>S.qty[s.id]=s.alt?0:s.n);
 const eur=v=>"€"+Math.round(v);
 const sp=id=>SPECIES.find(s=>s.id===id);
@@ -289,7 +296,7 @@ function calc(){
   const prijs=A.reduce((a,s)=>a+S.qty[s.id]*s.unit,0)+z.prijs;
   return{bollen,gaten,uren,z,prijs,dicht:bollen/24};
 }
-function paintedM2(id){return S.grid.filter(c=>c===id).length*CELL;}
+function paintedM2(id){let n=0;for(let i=0;i<COLS*ROWS;i++)if(S.gd.d[i]===id||S.gd.o[i]===id)n++;return n*CELL;}
 function zoneStats(zo){
   const ids=zo.ids.filter(id=>active().includes(sp(id)));
   const tot=ids.reduce((a,id)=>a+S.qty[id],0);
@@ -381,13 +388,16 @@ function renderCal(){
 }
 
 /* --- ontwerp --- */
-let brush=null;
+let brush=null,maandSel=0,altToegevoegd=false;
+const MND=["alle","jan","feb","mrt","apr","mei","jun","jul"];
+const laagVan=s=>s.diep>=12?"d":"o";
 function renderPalette(){
   const w=document.getElementById("palette");w.innerHTML="";
-  active().forEach(s=>{
+  SPECIES.forEach(s=>{
     const b=document.createElement("button");
     b.className="pal"+(brush===s.id?" on":"");
-    b.innerHTML=`<i style="background:${s.hex}"></i>${s.naam}`;
+    const b1=MND[s.bloei[0]],b2=MND[s.bloei[s.bloei.length-1]];
+    b.innerHTML=`<i style="background:${s.hex}"></i>${s.naam} <small>${b1===b2?b1:b1+"–"+b2}</small>`;
     b.onclick=()=>{brush=s.id;renderPalette();};
     w.appendChild(b);
   });
@@ -396,6 +406,40 @@ function renderPalette(){
   e.innerHTML=`<i style="background:var(--soil-3)"></i>Gum`;
   e.onclick=()=>{brush=null;renderPalette();};
   w.appendChild(e);
+}
+function renderScrub(){
+  const w=document.getElementById("scrub");w.innerHTML="";
+  MND.forEach((m,ix)=>{
+    const b=document.createElement("button");
+    if(maandSel===ix)b.className="on";
+    b.textContent=m;
+    b.onclick=()=>{maandSel=ix;renderScrub();paintGrid();renderBloeiInfo();};
+    w.appendChild(b);
+  });
+}
+function celIds(i){return[S.gd.d[i],S.gd.o[i]].filter(Boolean);}
+function styleCell(el){
+  const i=+el.dataset.i,ids=celIds(i);
+  if(!ids.length){el.style.background="";return;}
+  const col=id=>{
+    const s=sp(id);
+    return (maandSel===0||s.bloei.includes(maandSel))?s.hex:s.hex+"30";
+  };
+  if(ids.length===1)el.style.background=col(ids[0]);
+  else el.style.background=`linear-gradient(135deg,${col(S.gd.d[i])} 50%,${col(S.gd.o[i])} 50%)`;
+}
+function paintGrid(){document.querySelectorAll("#grid .cell").forEach(styleCell);}
+function renderBloeiInfo(){
+  const w=document.getElementById("bloei-info");if(!w)return;
+  if(maandSel===0){w.textContent="Tik een maand om te zien wat er dan bloeit in je ontwerp.";return;}
+  let P=0,B=0;const soorten=new Set();
+  for(let i=0;i<COLS*ROWS;i++){
+    const ids=celIds(i);if(!ids.length)continue;P++;
+    const v=ids.filter(id=>sp(id).bloei.includes(maandSel));
+    if(v.length){B++;v.forEach(id=>soorten.add(sp(id).naam.toLowerCase()));}
+  }
+  if(!P){w.textContent="Nog niets getekend.";return;}
+  w.textContent=B?`In ${MND[maandSel]} bloeit ${Math.round(B/P*100)}% van je getekende veld: ${[...soorten].join(", ")}.`:`In ${MND[maandSel]} bloeit er niets in je ontwerp — voeg een soort toe die dan bloeit.`;
 }
 function buildGrid(){
   const g=document.getElementById("grid");g.innerHTML="";
@@ -407,8 +451,13 @@ function buildGrid(){
   const paint=el=>{
     if(!el||!el.classList||!el.classList.contains("cell"))return;
     const i=+el.dataset.i;
-    S.grid[i]=brush;
-    el.style.background=brush?sp(brush).hex:"";
+    if(brush===null){S.gd.d[i]=null;S.gd.o[i]=null;}
+    else{
+      const s=sp(brush);
+      S.gd[laagVan(s)][i]=brush;
+      if(s.alt&&!S.plan[brush]){S.plan[brush]=true;if(!S.qty[brush])S.qty[brush]=s.n;altToegevoegd=true;}
+    }
+    styleCell(el);
   };
   g.addEventListener("pointerdown",ev=>{painting=true;paint(ev.target);ev.preventDefault();});
   g.addEventListener("pointermove",ev=>{
@@ -416,26 +465,24 @@ function buildGrid(){
     const el=document.elementFromPoint(ev.clientX,ev.clientY);
     paint(el);
   });
-  window.addEventListener("pointerup",()=>{if(painting){painting=false;save();renderDStats();if(S.arr==="vrij"){renderCheck();renderCards();}}});
-  paintGrid();
-}
-function paintGrid(){
-  document.querySelectorAll("#grid .cell").forEach(c=>{
-    const id=S.grid[+c.dataset.i];
-    c.style.background=id?sp(id).hex:"";
+  window.addEventListener("pointerup",()=>{
+    if(!painting)return;painting=false;save();renderDStats();renderBloeiInfo();
+    if(altToegevoegd){altToegevoegd=false;renderCards();renderOrder();renderCal();}
+    if(S.arr==="vrij"){renderCheck();renderCards();}
   });
+  paintGrid();
 }
 function renderDStats(){
   const w=document.getElementById("dstats");w.innerHTML="";
-  const tot=S.grid.filter(Boolean).length*CELL;
+  let tot=0;for(let i=0;i<COLS*ROWS;i++)if(celIds(i).length)tot+=CELL;
   let rows="";
   active().forEach(s=>{
     const m2=paintedM2(s.id);if(!m2)return;
     const adv=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
-    rows+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${s.naam}</span><span>${m2} m² × ${s.dens}/m²</span><b>&nbsp;→ ${adv} st</b></div>`;
+    rows+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${s.naam} <small style="color:var(--chalk-mut)">${laagVan(s)==="d"?"dieplaag":"ondiep"}</small></span><span>${m2} m² × ${s.dens}/m²</span><b>&nbsp;→ ${adv} st</b></div>`;
   });
-  w.innerHTML=rows||'<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Kies een soort en veeg over het raster.</span></div>';
-  if(rows)w.innerHTML+=`<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Getekend: ${tot} van 24 m²</span></div>`;
+  w.innerHTML=rows||'<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Kies een soort en veeg over het raster. Diep en ondiep mogen over elkaar (lasagne).</span></div>';
+  if(rows)w.innerHTML+=`<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Getekend: ${tot} van 24 m² grondvlak</span></div>`;
 }
 document.getElementById("apply-design").onclick=()=>{
   active().forEach(s=>{
@@ -447,7 +494,7 @@ document.getElementById("apply-design").onclick=()=>{
   toast.textContent="Ontwerp overgenomen";
   toast.classList.add("show");setTimeout(()=>{toast.classList.remove("show");toast.textContent="Gekopieerd";},1600);
 };
-document.getElementById("clear-design").onclick=()=>{S.grid=Array(COLS*ROWS).fill(null);save();paintGrid();renderDStats();if(S.arr==="vrij")refresh();};
+document.getElementById("clear-design").onclick=()=>{S.gd={d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)};save();paintGrid();renderDStats();renderBloeiInfo();if(S.arr==="vrij")refresh();};
 
 /* --- soorten + lightbox --- */
 function placeholder(k){return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="${k}"/><circle cx="15" cy="24" r="6" fill="${k}" opacity=".7"/><circle cx="33" cy="24" r="6" fill="${k}" opacity=".7"/><rect x="22.5" y="26" width="3" height="16" rx="1.5" fill="#6FB98A"/></svg>`;}
@@ -574,7 +621,7 @@ function renderOrder(){
   document.getElementById("t-zand").textContent=c.z.L+" L · "+c.z.zakken+" zakken";
   document.getElementById("t-prijs").textContent=eur(c.prijs);
 }
-function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderCards();renderOrder();}
+function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();}
 
 function orderText(){
   const c=calc(),lines=["Bestellijst bollenveld 6×4 m (Duffel) — schikking: "+ARR[S.arr].titel,""];
@@ -614,10 +661,14 @@ async function load(){
     if(window.storage){const r=await window.storage.get(KEY);v=r&&r.value;}
     else v=localStorage.getItem(KEY);
     if(v){const p=JSON.parse(v);S={...S,...p,qty:{...S.qty,...p.qty}};
-      if(!Array.isArray(S.grid)||S.grid.length!==COLS*ROWS)S.grid=Array(COLS*ROWS).fill(null);}
+      if(!S.gd||!Array.isArray(S.gd.d)||S.gd.d.length!==COLS*ROWS||!Array.isArray(S.gd.o)||S.gd.o.length!==COLS*ROWS){
+        S.gd={d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)};
+        if(Array.isArray(p.grid)&&p.grid.length===COLS*ROWS)p.grid.forEach((id,ix)=>{if(id&&sp(id))S.gd[laagVan(sp(id))][ix]=id;});
+      }
+      delete S.grid;}
   }catch(e){}
 }
-(async()=>{await load();buildGrid();refresh();})();
+(async()=>{await load();buildGrid();renderScrub();refresh();})();
 </script>
 </body>
 </html>
