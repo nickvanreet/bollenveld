@@ -453,10 +453,13 @@ document.getElementById("clear-design").onclick=()=>{S.grid=Array(COLS*ROWS).fil
 function placeholder(k){return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="${k}"/><circle cx="15" cy="24" r="6" fill="${k}" opacity=".7"/><circle cx="33" cy="24" r="6" fill="${k}" opacity=".7"/><rect x="22.5" y="26" width="3" height="16" rx="1.5" fill="#6FB98A"/></svg>`;}
 const fotoCache={};
 async function foto(s,el){
-  if(fotoCache[s.id]){show(fotoCache[s.id]);return;}
-  function show(src){
-    const img=new Image();img.alt=s.naam;img.loading="lazy";
-    img.onload=()=>{el.innerHTML="";el.appendChild(img);};
+  if(fotoCache[s.id]){plaats(fotoCache[s.id]);return;}
+  const kandidaten=[];let i=0;
+  function volgende(){if(i<kandidaten.length)plaats(kandidaten[i++]);}
+  function plaats(src){
+    const img=new Image();img.alt=s.naam;
+    img.onload=()=>{el.innerHTML="";el.appendChild(img);fotoCache[s.id]=src;};
+    img.onerror=volgende;
     img.src=src;
   }
   for(const w of ["nl","en"]){
@@ -465,12 +468,14 @@ async function foto(s,el){
       if(!r.ok)continue;
       const d=await r.json();
       if(d.thumbnail&&d.thumbnail.source){
-        fotoCache[s.id]=d.thumbnail.source.replace(/\/\d+px-/,"/320px-");
-        show(fotoCache[s.id]);
-        return;
+        kandidaten.push(d.thumbnail.source.replace(/\/\d+px-/,"/320px-"));
+        kandidaten.push(d.thumbnail.source);
       }
+      if(d.originalimage&&d.originalimage.source)kandidaten.push(d.originalimage.source);
+      if(kandidaten.length)break;
     }catch(e){}
   }
+  volgende();
 }
 const lb=document.getElementById("lb");
 lb.onclick=()=>lb.classList.remove("on");
