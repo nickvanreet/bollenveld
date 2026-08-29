@@ -210,8 +210,17 @@ details li b{color:var(--chalk)}
 
 <section class="pane" id="pane-bestel">
   <h2>Bestellijst<small>gegroepeerd per leverancier</small></h2>
+  <details class="opt" id="tuner" style="margin-bottom:14px">
+    <summary>Mix afstemmen — meer bloei waar jij wil</summary>
+    <div class="pal-h">Maanden — tik om te wisselen: · normaal, + extra, − minder</div>
+    <div class="scrub" id="tun-mnd"></div>
+    <div class="pal-h">Soorten</div>
+    <div class="palette" id="tun-srt" style="flex-wrap:wrap"></div>
+    <div class="bloei-info" id="tun-preview"></div>
+    <button class="btn" id="tun-apply" style="margin-top:8px">Pas toe op de aantallen</button>
+  </details>
   <div id="order"></div>
-  <div class="totals">
+  <div class="totals" id="totals-box">
     <div class="tot-row"><span>Bollen</span><b id="t-bollen">0</b></div>
     <div class="tot-row"><span>Gemiddeld over het veld</span><b id="t-dicht">0 /m²</b></div>
     <div class="tot-row"><span>Plantgaten (sneeuwklokjes per pol)</span><b id="t-gaten">0</b></div>
@@ -220,7 +229,8 @@ details li b{color:var(--chalk)}
     <div class="tot-main"><span style="font-size:13px;color:var(--chalk-dim)">Richtprijs totaal, ±15%</span><b id="t-prijs">€0</b></div>
   </div>
   <button class="btn" id="copy">Kopieer bestellijst</button>
-  <button class="btn ghost" id="reset-qty">Zet aantallen terug op advies</button>
+  <button class="btn ghost" id="reset-qty">Zet terug op adviesaantallen</button>
+  <button class="btn ghost" id="leeg-lijst">Maak de lijst leeg</button>
   <div class="hint">Sneeuwklokjes zijn een aparte bestelling in januari — De Warande verzendt "in het groen" vanaf begin februari. Tulpen pas in november planten (koelere grond remt tulpenvuur en muizenvraat).</div>
 </section>
 
@@ -300,11 +310,13 @@ const PREV={
  vrij:`<svg viewBox="0 0 120 84"><g opacity=".9"><rect x="10" y="10" width="18" height="18" rx="3" fill="var(--roze)"/><rect x="30" y="10" width="18" height="18" rx="3" fill="var(--roze)" opacity=".6"/><rect x="50" y="22" width="18" height="18" rx="3" fill="var(--geel)"/><rect x="70" y="10" width="18" height="18" rx="3" fill="var(--blauw)"/><rect x="90" y="30" width="18" height="18" rx="3" fill="var(--paars)"/><rect x="30" y="48" width="18" height="18" rx="3" fill="var(--blauw)" opacity=".7"/><rect x="60" y="56" width="18" height="18" rx="3" fill="var(--wit)"/><rect x="90" y="56" width="18" height="18" rx="3" fill="var(--geel)" opacity=".7"/></g></svg>`
 };
 const KEY="bollenveld-v4",COLS=12,ROWS=8,CELL=0.25;
-let S={arr:"stinzen",qty:{},done:{},st:{},plan:{},saves:[],gd:{d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)}};
-SPECIES.forEach(s=>S.qty[s.id]=s.alt?0:s.n);
+let S={arr:"stinzen",qty:{},done:{},st:{},plan:{},saves:[],tun:{m:{},s:{}},gd:{d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)}};
+SPECIES.forEach(s=>S.qty[s.id]=0);
 const eur=v=>"€"+Math.round(v);
 const sp=id=>SPECIES.find(s=>s.id===id);
 const active=()=>SPECIES.filter(s=>!s.alt||S.plan[s.id]);
+const lijstLeeg=()=>active().every(s=>!S.qty[s.id]);
+const qEff=id=>S.qty[id]>0?S.qty[id]:(lijstLeeg()?sp(id).n:0);
 
 /* --- rekenwerk --- */
 function zand(){const L=Math.round(ARR[S.arr].zandM2*25);return{L,zakken:Math.ceil(L/15),prijs:Math.ceil(L/15)*4.5};}
@@ -320,7 +332,7 @@ function calc(){
 function paintedM2(id){let n=0;for(let i=0;i<COLS*ROWS;i++)if(S.gd.d[i]===id||S.gd.o[i]===id)n++;return n*CELL;}
 function zoneStats(zo){
   const ids=zo.ids.filter(id=>active().includes(sp(id)));
-  const tot=ids.reduce((a,id)=>a+S.qty[id],0);
+  const tot=ids.reduce((a,id)=>a+qEff(id),0);
   const ref=ids.reduce((a,id)=>a+sp(id).n,0);
   const dens=tot/zo.m2, ratio=ref?tot/ref:1;
   let kleur="var(--groen)",label="goed gevuld";
@@ -333,7 +345,7 @@ function vrijStats(s){
   const m2=paintedM2(s.id);
   if(!m2)return null;
   const advies=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
-  const dens=S.qty[s.id]/m2, ratio=s.dens?dens/s.dens:1;
+  const dens=qEff(s.id)/m2, ratio=s.dens?dens/s.dens:1;
   let kleur="var(--groen)",label="goed gevuld";
   if(ratio<0.4||ratio>1.8){kleur="var(--rood)";label=ratio<0.4?"te ijl":"te dicht";}
   else if(ratio<0.7){kleur="var(--geel)";label="aan de ijle kant";}
@@ -364,22 +376,25 @@ function renderOpts(){
     d.className="opt"+(S.arr===k?" on":"");
     d.innerHTML=`<div class="opt-head"><h3>${a.titel}</h3>${S.arr===k?'<span class="badge">gekozen</span>':""}</div>
       <div class="opt-body">${PREV[k]}<ul>${a.pro.map(p=>`<li>${p[0]}: ${p[1]}</li>`).join("")}</ul></div>
-      <details><summary>Plantinstructie</summary><ol>${a.stappen.map(s=>`<li>${s}</li>`).join("")}</ol></details>`;
+      <details><summary>Plantinstructie</summary><ol>${a.stappen.map(s=>`<li>${s}</li>`).join("")}</ol></details>
+      <button class="chip add" style="margin-top:12px" data-vul="${k}">→ Zet adviesaantallen in bestellijst</button>`;
     const kies=()=>{S.arr=k;save();refresh();};
     d.querySelector(".opt-head").onclick=kies;
     d.querySelector(".opt-body").onclick=kies;
+    d.querySelector("[data-vul]").onclick=()=>{S.arr=k;vulAdviesVoor(k);save();refresh();melding("Aantallen in bestellijst gezet — zie tab Bestellijst");};
     w.appendChild(d);
   });
 }
 function renderCheck(){
   const w=document.getElementById("veldcheck");w.innerHTML="";
+  if(lijstLeeg())w.innerHTML='<div class="zone"><div class="zone-info"><b>Adviesaantallen getoond</b><span>de bestellijst is nog leeg — zet een schikking of ontwerp door</span></div></div>';
   if(S.arr==="vrij"){
     let any=false;
     active().forEach(s=>{
       const v=vrijStats(s);if(!v)return;any=true;
       const r=document.createElement("div");r.className="zone";
       r.innerHTML=`<span class="dot" style="background:${v.kleur}"></span>
-        <div class="zone-info"><b>${s.naam}</b><span>${v.m2} m² getekend · ${S.qty[s.id]} bollen · ${v.label}</span></div>
+        <div class="zone-info"><b>${s.naam}</b><span>${v.m2} m² getekend · ${qEff(s.id)} bollen · ${v.label}</span></div>
         <div class="zone-num"><b>${Math.round(v.dens)}</b><span>bollen/m²</span></div>`;
       w.appendChild(r);
     });
@@ -624,7 +639,7 @@ function cardEl(s,isAlt){
     <div style="flex:1;min-width:0">
       <h3>${s.naam}</h3><div class="lat">${s.lat}</div>
       ${isAlt?"":`<div class="plek">→ ${plekOf(s)}</div>`}
-      <div class="meta"><span><b>${isAlt?s.n+" advies":S.qty[s.id]}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>advies <b>${s.dens}</b>/m²</span><span>max <b>${perM2}</b>/m²</span></div>
+      <div class="meta"><span><b>${isAlt?s.n+" advies":qEff(s.id)}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>advies <b>${s.dens}</b>/m²</span><span>max <b>${perM2}</b>/m²</span></div>
       <div class="chips">${isAlt
         ?`<button class="chip add" data-id="${s.id}">+ voeg toe aan plan</button>`
         :`<button class="chip ${st.planted?"on":""}" data-act="plant" data-id="${s.id}">${st.planted?"✓ geplant":"geplant"}</button>${s.alt?`<button class="chip" data-act="rm" data-id="${s.id}">verwijder uit plan</button>`:""}`}
@@ -662,8 +677,16 @@ function zoneInfoFor(s){
 }
 function renderOrder(){
   const w=document.getElementById("order");w.innerHTML="";
+  const leeg=lijstLeeg();
+  ["totals-box","copy","reset-qty","tuner"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=leeg?"none":"";});
+  if(leeg){
+    w.innerHTML=`<div class="check"><div class="zone"><div class="zone-info"><b>Je bestellijst is nog leeg</b><span>kies een schikking of teken een ontwerp, en klik die door naar de lijst</span></div></div></div>
+      <button class="btn" id="vul-nu" style="margin-top:12px">Gebruik gekozen schikking (adviesaantallen)</button>`;
+    document.getElementById("vul-nu").onclick=()=>{vulAdviesVoor(S.arr);save();refresh();melding("Adviesaantallen gezet");};
+    return;
+  }
   ["war","bul","eco","jan","mat"].forEach(g=>{
-    const items=active().filter(s=>s.sup===g);
+    const items=active().filter(s=>s.sup===g&&S.qty[s.id]>0);
     if(g!=="mat"&&!items.length)return;
     const sub=g==="mat"?zand().prijs:items.reduce((a,s)=>a+S.qty[s.id]*s.unit,0);
     const h=document.createElement("div");h.className="grp";
@@ -703,7 +726,7 @@ function renderOrder(){
   document.getElementById("t-zand").textContent=c.z.L+" L · "+c.z.zakken+" zakken";
   document.getElementById("t-prijs").textContent=eur(c.prijs);
 }
-function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();}
+function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();renderTuner();}
 
 function orderText(){
   const c=calc(),lines=["Bestellijst bollenveld 6×4 m (Duffel) — schikking: "+ARR[S.arr].titel,""];
@@ -730,7 +753,62 @@ document.getElementById("copy").onclick=async()=>{
   const toast=document.getElementById("toast");
   toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1600);
 };
-document.getElementById("reset-qty").onclick=()=>{active().forEach(s=>S.qty[s.id]=s.n);save();refresh();};
+document.getElementById("reset-qty").onclick=()=>{vulAdviesVoor(S.arr);save();refresh();};
+document.getElementById("leeg-lijst").onclick=()=>{SPECIES.forEach(s=>S.qty[s.id]=0);save();refresh();};
+
+/* --- doorklikken naar bestellijst + mix-tuner --- */
+function vulAdviesVoor(k){
+  SPECIES.forEach(s=>{if(s.alt&&!S.plan[s.id])S.qty[s.id]=0;});
+  if(k==="vrij"){
+    active().forEach(s=>{
+      const m2=paintedM2(s.id);
+      S.qty[s.id]=m2?Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step):0;
+    });
+  }else active().forEach(s=>S.qty[s.id]=s.n);
+}
+const TCYC={1:1.6,1.6:0.5,0.5:1};
+const tSym=v=>v===1.6?"+":v===0.5?"−":"·";
+function tunSugg(){
+  return active().map(s=>{
+    const basis=S.qty[s.id]>0?S.qty[s.id]:(S.arr==="vrij"&&paintedM2(s.id)>0?Math.max(s.step,Math.round(paintedM2(s.id)*s.dens/s.step)*s.step):s.n);
+    const mm=s.bloei.reduce((a,md)=>a+(S.tun.m[md]||1),0)/s.bloei.length;
+    const sm=S.tun.s[s.id]||1;
+    return{id:s.id,q:Math.max(0,Math.round(basis*mm*sm/s.step)*s.step)};
+  });
+}
+function renderTuner(){
+  const wm=document.getElementById("tun-mnd");if(!wm)return;
+  wm.innerHTML="";
+  for(let md=1;md<=7;md++){
+    const v=S.tun.m[md]||1;
+    const b=document.createElement("button");
+    if(v!==1)b.className="on";
+    b.textContent=MND[md]+" "+tSym(v);
+    b.onclick=()=>{S.tun.m[md]=TCYC[v];save();renderTuner();};
+    wm.appendChild(b);
+  }
+  const ws=document.getElementById("tun-srt");ws.innerHTML="";
+  active().forEach(s=>{
+    const v=S.tun.s[s.id]||1;
+    const b=document.createElement("button");
+    b.className="pal"+(v!==1?" on":"");
+    b.innerHTML=`<i style="background:${s.hex}"></i>${s.naam} <small>${tSym(v)}</small>`;
+    b.onclick=()=>{S.tun.s[s.id]=TCYC[v];save();renderTuner();};
+    ws.appendChild(b);
+  });
+  const sugg=tunSugg();
+  const tot=sugg.reduce((a,x)=>a+x.q,0);
+  const prijs=sugg.reduce((a,x)=>a+x.q*sp(x.id).unit,0)+zand().prijs;
+  const perMd={};
+  for(let md=1;md<=7;md++)perMd[md]=sugg.reduce((a,x)=>a+(sp(x.id).bloei.includes(md)?x.q:0),0);
+  const top=Object.entries(perMd).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById("tun-preview").textContent=
+    `Na toepassen: ${tot.toLocaleString("nl-BE")} bollen · ±€${Math.round(prijs)} · zwaartepunt in ${MND[+top[0]]} (${tot?Math.round(top[1]/tot*100):0}% van de bollen bloeit dan).`;
+}
+document.getElementById("tun-apply").onclick=()=>{
+  tunSugg().forEach(x=>S.qty[x.id]=x.q);
+  save();refresh();melding("Mix toegepast op de aantallen");
+};
 
 /* --- voorbeeldschikkingen in het raster --- */
 function vbStroken(){
@@ -857,6 +935,7 @@ async function load(){
         if(Array.isArray(p.grid)&&p.grid.length===COLS*ROWS)p.grid.forEach((id,ix)=>{if(id&&sp(id))S.gd[laagVan(sp(id))][ix]=id;});
       }
       if(!Array.isArray(S.saves))S.saves=[];
+      if(!S.tun||!S.tun.m||!S.tun.s)S.tun={m:{},s:{}};
       delete S.grid;}
   }catch(e){}
 }
