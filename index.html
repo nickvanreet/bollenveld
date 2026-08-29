@@ -85,6 +85,10 @@ details li b{color:var(--chalk)}
 .bp-lbl{display:flex;gap:4px;font-size:10.5px;color:var(--chalk-mut);text-align:center;margin-bottom:6px}
 .bp-lbl span{flex:1}
 .ov-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-mut);padding:8px 0 2px}
+.gridwrap{position:relative}
+#veldbeeld{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;border-radius:6px}
+.veld #veldbeeld{display:block}
+.veld #grid .cell{opacity:.14}
 /* kalender */
 .cal{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px}
 .cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
@@ -179,12 +183,18 @@ details li b{color:var(--chalk)}
   <div class="pal-h">Bovenlaag · 5–10 cm · komt bovenop</div>
   <div class="palette" id="palette-o"></div>
   <div class="binfo" id="binfo"></div>
+  <div class="pal-h">Penseel</div>
+  <div class="scrub" id="sizerow"></div>
   <div class="pal-h">Voorbeeld laden — zet een schikking in het raster, daarna vrij bij te tekenen</div>
   <div class="scrub" id="vbrow"></div>
+  <div class="scrub" id="toolrow"></div>
   <div class="scrub" id="laagview"></div>
-  <div class="gridbox">
+  <div class="gridbox" id="gridbox">
     <div class="gridlbl"><span>← west (avondzon)</span><span>oost →</span></div>
-    <div id="grid"></div>
+    <div class="gridwrap">
+      <div id="grid"></div>
+      <svg id="veldbeeld" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
   </div>
   <div class="scrub" id="scrub"></div>
   <div class="bloei-info" id="bloei-info"></div>
@@ -424,9 +434,11 @@ function renderCal(){
 }
 
 /* --- ontwerp --- */
-let brush=null,maandSel=0,laagSel="beide",altToegevoegd=false;
+let brush=null,maandSel=0,laagSel="beide",altToegevoegd=false,brushSize="pol",view="plan";
+let HIST=[],REDO=[];
 const MND=["alle","jan","feb","mrt","apr","mei","jun","jul"];
 const laagVan=s=>s.diep>=12?"d":"o";
+const rnd=n=>{const x=Math.sin(n*127.1)*43758.5453;return x-Math.floor(x);};
 function plantWanneer(s){
   if(s.id==="gal")return"planten jan–feb, in het groen";
   if(s.id==="tul"||s.id==="tcl")return"planten in november";
@@ -486,6 +498,44 @@ function renderLaagview(){
     w.appendChild(b);
   });
 }
+function renderSize(){
+  const w=document.getElementById("sizerow");if(!w)return;w.innerHTML="";
+  [["cel","cel"],["pol","polletje"],["drift","drift"],["groot","grote drift"],["strooi","strooien"]].forEach(([k,lbl])=>{
+    const b=document.createElement("button");
+    if(brushSize===k)b.className="on";
+    b.textContent=lbl;
+    b.onclick=()=>{brushSize=k;renderSize();};
+    w.appendChild(b);
+  });
+}
+function renderTool(){
+  const w=document.getElementById("toolrow");if(!w)return;w.innerHTML="";
+  const u=document.createElement("button");u.textContent="↶ ongedaan";u.onclick=undo;
+  const r=document.createElement("button");r.textContent="↷ opnieuw";r.onclick=redo;
+  const p=document.createElement("button");p.textContent="▦ plan";if(view==="plan")p.className="on";
+  const v=document.createElement("button");v.textContent="🌷 veldbeeld";if(view==="veld")v.className="on";
+  p.onclick=()=>{view="plan";document.getElementById("gridbox").classList.remove("veld");renderTool();};
+  v.onclick=()=>{view="veld";document.getElementById("gridbox").classList.add("veld");renderVeld();renderTool();};
+  [u,r,p,v].forEach(b=>w.appendChild(b));
+}
+function pushHist(){HIST.push(JSON.stringify(S.gd));if(HIST.length>40)HIST.shift();REDO=[];}
+function undo(){if(!HIST.length)return;REDO.push(JSON.stringify(S.gd));S.gd=JSON.parse(HIST.pop());save();paintGrid();renderDStats();renderBloeiInfo();}
+function redo(){if(!REDO.length)return;HIST.push(JSON.stringify(S.gd));S.gd=JSON.parse(REDO.pop());save();paintGrid();renderDStats();renderBloeiInfo();}
+function stampCells(i0){
+  const r0=Math.floor(i0/COLS),c0=i0%COLS,uit=[];
+  const R={cel:0,pol:1.1,drift:1.7,groot:2.5,strooi:2.3}[brushSize];
+  if(brushSize==="cel")return[i0];
+  for(let dr=-3;dr<=3;dr++)for(let dc=-3;dc<=3;dc++){
+    const r=r0+dr,c=c0+dc;
+    if(r<0||r>=ROWS||c<0||c>=COLS)continue;
+    const d=Math.hypot(dr,dc);
+    const grens=R*(0.78+0.45*rnd(i0*7+dr*13+dc*29));
+    if(brushSize==="strooi"){if(d<=R&&rnd(i0*3+dr*17+dc*31)<0.42)uit.push(r*COLS+c);}
+    else if(d<=grens)uit.push(r*COLS+c);
+  }
+  if(!uit.includes(i0))uit.push(i0);
+  return uit;
+}
 function celIds(i){return[S.gd.d[i],S.gd.o[i]].filter(Boolean);}
 function styleCell(el){
   const i=+el.dataset.i;
@@ -499,7 +549,36 @@ function styleCell(el){
   if(d&&o)el.style.background=`linear-gradient(180deg,${col(o)} 0 50%,${col(d)} 50% 100%)`;
   else el.style.background=col(d||o);
 }
-function paintGrid(){document.querySelectorAll("#grid .cell").forEach(styleCell);}
+function paintGrid(){
+  document.querySelectorAll("#grid .cell").forEach(styleCell);
+  if(view==="veld")renderVeld();
+}
+function dotSpec(s){
+  if(["aps","nec","cam","leu"].includes(s.id))return{n:2,r:1.8};
+  if(["nar","tul","npo","tcl","bos","iri"].includes(s.id))return{n:3,r:1.15};
+  return{n:6,r:0.62};
+}
+function renderVeld(){
+  const svg=document.getElementById("veldbeeld");if(!svg)return;
+  let out="";
+  const teken=(id,i,k0)=>{
+    const s=sp(id),d=dotSpec(s);
+    const bloeit=maandSel===0||s.bloei.includes(maandSel);
+    const r=Math.floor(i/COLS),c=i%COLS;
+    for(let k=0;k<d.n;k++){
+      const x=c*10+1.5+7*rnd(i*31+k*17+k0);
+      const y=r*10+1.5+7*rnd(i*57+k*23+k0);
+      out+=bloeit
+        ?`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${d.r}" fill="${s.hex}"/>`
+        :`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(d.r*0.5).toFixed(2)}" fill="#55684A" opacity=".55"/>`;
+    }
+  };
+  for(let i=0;i<COLS*ROWS;i++){
+    if(laagSel!=="diep"&&S.gd.o[i])teken(S.gd.o[i],i,3);
+    if(laagSel!=="boven"&&S.gd.d[i])teken(S.gd.d[i],i,11);
+  }
+  svg.innerHTML=out;
+}
 function renderBloeiInfo(){
   const w=document.getElementById("bloei-info");if(!w)return;
   if(maandSel===0){w.textContent="Tik een maand om te zien wat er dan bloeit in je ontwerp.";return;}
@@ -518,30 +597,90 @@ function buildGrid(){
     const c=document.createElement("div");c.className="cell";c.dataset.i=i;
     g.appendChild(c);
   }
-  let painting=false;
-  const paint=el=>{
-    if(!el||!el.classList||!el.classList.contains("cell"))return;
-    const i=+el.dataset.i;
-    if(brush===null){S.gd.d[i]=null;S.gd.o[i]=null;}
-    else{
-      const s=sp(brush);
-      S.gd[laagVan(s)][i]=brush;
-      if(s.alt&&!S.plan[brush]){S.plan[brush]=true;if(!S.qty[brush])S.qty[brush]=s.n;altToegevoegd=true;}
-    }
-    styleCell(el);
+  let painting=false,laatste=-1;
+  const paintAt=i=>{
+    if(i===laatste)return;laatste=i;
+    stampCells(i).forEach(ix=>{
+      if(brush===null){S.gd.d[ix]=null;S.gd.o[ix]=null;}
+      else{
+        const s=sp(brush);
+        S.gd[laagVan(s)][ix]=brush;
+        if(s.alt&&!S.plan[brush]){S.plan[brush]=true;if(!S.qty[brush])S.qty[brush]=s.n;altToegevoegd=true;}
+      }
+    });
+    paintGrid();
   };
-  g.addEventListener("pointerdown",ev=>{painting=true;paint(ev.target);ev.preventDefault();});
+  const vind=ev=>{
+    const el=document.elementFromPoint(ev.clientX,ev.clientY);
+    return(el&&el.classList&&el.classList.contains("cell"))?+el.dataset.i:-1;
+  };
+  g.addEventListener("pointerdown",ev=>{
+    const i=vind(ev);if(i<0)return;
+    pushHist();painting=true;laatste=-1;paintAt(i);ev.preventDefault();
+  });
   g.addEventListener("pointermove",ev=>{
     if(!painting)return;
-    const el=document.elementFromPoint(ev.clientX,ev.clientY);
-    paint(el);
+    const i=vind(ev);if(i>=0)paintAt(i);
   });
   window.addEventListener("pointerup",()=>{
-    if(!painting)return;painting=false;save();renderDStats();renderBloeiInfo();
+    if(!painting)return;painting=false;laatste=-1;save();renderDStats();renderBloeiInfo();
     if(altToegevoegd){altToegevoegd=false;renderCards();renderOrder();renderCal();}
     if(S.arr==="vrij"){renderCheck();renderCards();}
   });
   paintGrid();
+}
+function componenten(id){
+  const cel=i=>S.gd.d[i]===id||S.gd.o[i]===id;
+  const gezien=new Set(),comps=[];
+  for(let i=0;i<COLS*ROWS;i++){
+    if(!cel(i)||gezien.has(i))continue;
+    let n=0;const q=[i];gezien.add(i);
+    while(q.length){
+      const j=q.pop();n++;
+      const r=Math.floor(j/COLS),c=j%COLS;
+      [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([rr,cc])=>{
+        if(rr<0||rr>=ROWS||cc<0||cc>=COLS)return;
+        const k=rr*COLS+cc;
+        if(cel(k)&&!gezien.has(k)){gezien.add(k);q.push(k);}
+      });
+    }
+    comps.push(n);
+  }
+  return comps;
+}
+function analyse(){
+  const punten=[];
+  let P=0;for(let i=0;i<COLS*ROWS;i++)if(celIds(i).length)P++;
+  if(!P)return punten;
+  const pct={};
+  for(let md=1;md<=7;md++){
+    let B=0;
+    for(let i=0;i<COLS*ROWS;i++){const ids=celIds(i);if(ids.length&&ids.some(id=>sp(id).bloei.includes(md)))B++;}
+    pct[md]=Math.round(B/P*100);
+  }
+  const actief=Object.keys(pct).filter(md=>pct[md]>0).map(Number);
+  if(actief.length){
+    const gaten=[];
+    for(let md=Math.min(...actief);md<=Math.max(...actief);md++)if(pct[md]<20)gaten.push(MND[md]);
+    if(gaten.length)punten.push(`Bloeigat in ${gaten.join(" en ")} — trommelstokjes of honinglook vullen juni–juli, muscari en boshyacint het voorjaar.`);
+  }
+  active().forEach(s=>{
+    const comps=componenten(s.id);
+    if(comps.filter(n=>n<=2).length>=3)punten.push(`${s.naam} ligt in veel kleine snippers — voeg samen tot 1–2 drifts.`);
+    else if(["aps","nec","cam","npo"].includes(s.id)&&comps.length===1&&comps[0]>=6)punten.push(`Herhaal ${s.naam.toLowerCase()} op 2–3 plekken in plaats van één blok — dat geeft ritme.`);
+  });
+  const droog=["tul","tcl","iri","asp"];let fout=0;
+  for(let i=0;i<COLS*ROWS;i++){const c=i%COLS;if(c>3&&celIds(i).some(id=>droog.includes(id)))fout++;}
+  if(fout>3)punten.push("Droogteliefhebbers (tulp, iris, trommelstokjes) staan ver van de droge westrand links — daar rotten ze sneller weg.");
+  const nat=["cam","fri","leu"];fout=0;
+  for(let i=0;i<COLS*ROWS;i++){const c=i%COLS;if(c<6&&celIds(i).some(id=>nat.includes(id)))fout++;}
+  if(fout>2)punten.push("Natliefhebbers (camassia, kievitsbloem, zomerklokje) horen richting het natste punt.");
+  if(P>=32){
+    const matrix=["cro","chi","sci","gal","era","mus"];let m=0;
+    for(let i=0;i<COLS*ROWS;i++)if(S.gd.o[i]&&matrix.includes(S.gd.o[i]))m++;
+    if(m/P<0.4)punten.push("Weinig bindende bovenlaag — strooi krokus (of sneeuwroem) door het geheel als matrix.");
+  }
+  return punten.slice(0,4);
 }
 function renderDStats(){
   const w=document.getElementById("dstats");w.innerHTML="";
@@ -550,7 +689,9 @@ function renderDStats(){
     w.innerHTML='<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Kies een soort en veeg over het raster. Diep en boven mogen over elkaar (lasagne).</span></div>';
     return;
   }
-  /* bloeiprofiel jan–jul */
+  const punten=analyse();
+  let adv='<div class="ov-h">Aandachtspunten</div>';
+  adv+=punten.length?punten.map(p=>`<div class="ds-row"><span class="n" style="color:var(--oranje)">${p}</span></div>`).join(""):'<div class="ds-row"><span class="n" style="color:var(--groen)">Geen — rustige, gespreide compositie met doorlopende bloei.</span></div>';
   let bars='<div class="ov-h">Bloeiprofiel — aandeel van je tekening in bloei</div><div class="bp">';
   let lbls='<div class="bp-lbl">';
   for(let md=1;md<=7;md++){
@@ -564,7 +705,6 @@ function renderDStats(){
     lbls+=`<span>${MND[md]}</span>`;
   }
   bars+='</div>';lbls+='</div>';
-  /* overzicht per laag */
   let rows="";
   [["d","Onderin — dieplaag"],["o","Bovenop — bovenlaag"]].forEach(([laag,titel])=>{
     const met=active().filter(s=>laagVan(s)===laag&&paintedM2(s.id)>0);
@@ -572,13 +712,13 @@ function renderDStats(){
     rows+=`<div class="ov-h">${titel}</div>`;
     met.forEach(s=>{
       const m2=paintedM2(s.id);
-      const adv=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
+      const advc=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
       const b1=MND[s.bloei[0]],b2=MND[s.bloei[s.bloei.length-1]];
-      rows+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${s.naam} <small style="color:var(--chalk-mut)">${b1===b2?b1:b1+"–"+b2}</small></span><span>${m2} m² × ${s.dens}/m²</span><b>&nbsp;→ ${adv} st</b></div>`;
+      rows+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${s.naam} <small style="color:var(--chalk-mut)">${b1===b2?b1:b1+"–"+b2}</small></span><span>${m2} m² × ${s.dens}/m²</span><b>&nbsp;→ ${advc} st</b></div>`;
     });
   });
   rows+=`<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Getekend: ${tot} van 24 m² grondvlak</span></div>`;
-  w.innerHTML=bars+lbls+rows;
+  w.innerHTML=adv+bars+lbls+rows;
   w.querySelectorAll(".bpb").forEach(b=>b.onclick=()=>zetMaand(+b.dataset.md));
 }
 document.getElementById("apply-design").onclick=()=>{
@@ -587,174 +727,9 @@ document.getElementById("apply-design").onclick=()=>{
     if(m2)S.qty[s.id]=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
   });
   S.arr="vrij";save();refresh();
-  const toast=document.getElementById("toast");
-  toast.textContent="Ontwerp overgenomen";
-  toast.classList.add("show");setTimeout(()=>{toast.classList.remove("show");toast.textContent="Gekopieerd";},1600);
+  melding("Ontwerp overgenomen");
 };
-document.getElementById("clear-design").onclick=()=>{S.gd={d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)};save();paintGrid();renderDStats();renderBloeiInfo();if(S.arr==="vrij")refresh();};
-
-/* --- soorten + lightbox --- */
-function placeholder(k){return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="${k}"/><circle cx="15" cy="24" r="6" fill="${k}" opacity=".7"/><circle cx="33" cy="24" r="6" fill="${k}" opacity=".7"/><rect x="22.5" y="26" width="3" height="16" rx="1.5" fill="#6FB98A"/></svg>`;}
-const fotoCache={};
-async function foto(s,el){
-  if(fotoCache[s.id]){plaats(fotoCache[s.id]);return;}
-  const kandidaten=[];let i=0;
-  function volgende(){if(i<kandidaten.length)plaats(kandidaten[i++]);}
-  function plaats(src){
-    const img=new Image();img.alt=s.naam;
-    img.onload=()=>{el.innerHTML="";el.appendChild(img);fotoCache[s.id]=src;};
-    img.onerror=volgende;
-    img.src=src;
-  }
-  for(const w of ["nl","en"]){
-    try{
-      const r=await fetch(`https://${w}.wikipedia.org/api/rest_v1/page/summary/`+encodeURIComponent(s.wiki));
-      if(!r.ok)continue;
-      const d=await r.json();
-      if(d.thumbnail&&d.thumbnail.source){
-        kandidaten.push(d.thumbnail.source.replace(/\/\d+px-/,"/320px-"));
-        kandidaten.push(d.thumbnail.source);
-      }
-      if(d.originalimage&&d.originalimage.source)kandidaten.push(d.originalimage.source);
-      if(kandidaten.length)break;
-    }catch(e){}
-  }
-  volgende();
-}
-const lb=document.getElementById("lb");
-lb.onclick=()=>lb.classList.remove("on");
-function openLb(s){
-  const src=fotoCache[s.id];if(!src)return;
-  lb.querySelector("img").src=src.replace(/\/\d+px-/,"/640px-");
-  lb.querySelector(".lb-t").textContent=s.naam;
-  lb.querySelector(".lb-s").textContent=s.lat;
-  lb.querySelector(".lb-n").textContent=(s.note||"")+" Bloei: "+["","jan","feb","mrt","apr","mei","jun","jul"][s.bloei[0]]+"–"+["","jan","feb","mrt","apr","mei","jun","jul"][s.bloei[s.bloei.length-1]]+" · "+s.diep+" cm diep · advies "+s.dens+"/m².";
-  lb.classList.add("on");
-}
-function cardEl(s,isAlt){
-  const st=S.st[s.id]||{};
-  const perM2=Math.round(10000/(s.afst*s.afst));
-  const c=document.createElement("div");c.className="card";
-  c.innerHTML=`<div class="ph" id="ph-${s.id}">${placeholder(s.kleur)}</div>
-    <div style="flex:1;min-width:0">
-      <h3>${s.naam}</h3><div class="lat">${s.lat}</div>
-      ${isAlt?"":`<div class="plek">→ ${plekOf(s)}</div>`}
-      <div class="meta"><span><b>${isAlt?s.n+" advies":qEff(s.id)}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span><span>advies <b>${s.dens}</b>/m²</span><span>max <b>${perM2}</b>/m²</span></div>
-      <div class="chips">${isAlt
-        ?`<button class="chip add" data-id="${s.id}">+ voeg toe aan plan</button>`
-        :`<button class="chip ${st.planted?"on":""}" data-act="plant" data-id="${s.id}">${st.planted?"✓ geplant":"geplant"}</button>${s.alt?`<button class="chip" data-act="rm" data-id="${s.id}">verwijder uit plan</button>`:""}`}
-      </div>
-      ${s.note?`<div class="note">${s.note}</div>`:""}
-    </div>`;
-  c.querySelector(".ph").onclick=()=>openLb(s);
-  foto(s,c.querySelector("#ph-"+s.id));
-  return c;
-}
-function renderCards(){
-  document.getElementById("soorten-hint").textContent="Plek volgens gekozen schikking: "+ARR[S.arr].titel.toLowerCase()+". Vuistregel diepte: 2–3× de bolhoogte. Tik op een foto voor groot beeld.";
-  const w=document.getElementById("cards");w.innerHTML="";
-  active().forEach(s=>w.appendChild(cardEl(s,false)));
-  const aw=document.getElementById("altcards");aw.innerHTML="";
-  SPECIES.filter(s=>s.alt&&!S.plan[s.id]).forEach(s=>aw.appendChild(cardEl(s,true)));
-  document.querySelectorAll("#cards .chip,#altcards .chip").forEach(c=>{
-    c.onclick=()=>{
-      const id=c.dataset.id;
-      if(c.classList.contains("add")){S.plan[id]=true;S.qty[id]=sp(id).n;}
-      else if(c.dataset.act==="rm"){delete S.plan[id];S.qty[id]=0;}
-      else{S.st[id]=S.st[id]||{};S.st[id].planted=!S.st[id].planted;}
-      save();refresh();
-    };
-  });
-}
-
-/* --- bestellijst --- */
-function zoneInfoFor(s){
-  if(S.arr==="vrij"){const v=vrijStats(s);return v?{txt:`ontwerp ${v.m2} m²: ${Math.round(v.dens)}/m² · ${v.label}`,kleur:v.kleur}:null;}
-  const zo=ARR[S.arr].zones.find(z=>z.ids.includes(s.id));
-  if(!zo)return null;
-  const st=zoneStats(zo);
-  return{txt:`${zo.naam.toLowerCase()}: ${Math.round(st.dens)}/m² · ${st.label}`,kleur:st.kleur};
-}
-function renderOrder(){
-  const w=document.getElementById("order");w.innerHTML="";
-  const leeg=lijstLeeg();
-  ["totals-box","copy","reset-qty","tuner"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=leeg?"none":"";});
-  if(leeg){
-    w.innerHTML=`<div class="check"><div class="zone"><div class="zone-info"><b>Je bestellijst is nog leeg</b><span>kies een schikking of teken een ontwerp, en klik die door naar de lijst</span></div></div></div>
-      <button class="btn" id="vul-nu" style="margin-top:12px">Gebruik gekozen schikking (adviesaantallen)</button>`;
-    document.getElementById("vul-nu").onclick=()=>{vulAdviesVoor(S.arr);save();refresh();melding("Adviesaantallen gezet");};
-    return;
-  }
-  ["war","bul","eco","jan","mat"].forEach(g=>{
-    const items=active().filter(s=>s.sup===g&&S.qty[s.id]>0);
-    if(g!=="mat"&&!items.length)return;
-    const sub=g==="mat"?zand().prijs:items.reduce((a,s)=>a+S.qty[s.id]*s.unit,0);
-    const h=document.createElement("div");h.className="grp";
-    h.innerHTML=`<span>${SUPS[g].naam}<br><span style="text-transform:none;letter-spacing:0">${SUPS[g].sub}</span></span><b>${eur(sub)}</b>`;
-    w.appendChild(h);
-    items.forEach(s=>{
-      const zi=zoneInfoFor(s);
-      const row=document.createElement("div");
-      row.className="order-row"+(S.done[s.id]?" done":"");
-      row.innerHTML=`<button class="order-check" aria-label="besteld">${S.done[s.id]?"✓":""}</button>
-        <div class="order-info"><b>${s.naam}</b><span>${s.lat}</span>
-          ${zi?`<div class="dens" style="color:${zi.kleur}">${zi.txt}</div>`:""}</div>
-        <div class="stepper"><button aria-label="minder">−</button><div class="qty">${S.qty[s.id]}</div><button aria-label="meer">+</button></div>
-        <div class="order-price">${eur(S.qty[s.id]*s.unit)}</div>`;
-      row.querySelector(".order-check").onclick=()=>{S.done[s.id]=!S.done[s.id];save();renderOrder();};
-      const [minus,plus]=row.querySelectorAll(".stepper button");
-      minus.onclick=()=>{S.qty[s.id]=Math.max(0,S.qty[s.id]-s.step);save();refresh();};
-      plus.onclick=()=>{S.qty[s.id]+=s.step;save();refresh();};
-      w.appendChild(row);
-    });
-    if(g==="mat"){
-      const z=zand();
-      const row=document.createElement("div");
-      row.className="order-row"+(S.done.zand?" done":"");
-      row.innerHTML=`<button class="order-check">${S.done.zand?"✓":""}</button>
-        <div class="order-info"><b>Scherp zand</b><span>${z.zakken} zakken van 25 kg · ${z.L} L voor ${ARR[S.arr].zandM2} m² westrand</span></div>
-        <div class="order-price">${eur(z.prijs)}</div>`;
-      row.querySelector(".order-check").onclick=()=>{S.done.zand=!S.done.zand;save();renderOrder();};
-      w.appendChild(row);
-    }
-  });
-  const c=calc();
-  document.getElementById("t-bollen").textContent=c.bollen.toLocaleString("nl-BE");
-  document.getElementById("t-dicht").textContent=Math.round(c.dicht)+" /m²";
-  document.getElementById("t-gaten").textContent=c.gaten.toLocaleString("nl-BE");
-  document.getElementById("t-tijd").textContent=(Math.round(c.uren*2)/2).toLocaleString("nl-BE")+" u";
-  document.getElementById("t-zand").textContent=c.z.L+" L · "+c.z.zakken+" zakken";
-  document.getElementById("t-prijs").textContent=eur(c.prijs);
-}
-function refresh(){renderOpts();renderCheck();renderCal();renderPalette();renderDStats();renderBloeiInfo();renderCards();renderOrder();renderTuner();}
-
-function orderText(){
-  const c=calc(),lines=["Bestellijst bollenveld 6×4 m (Duffel) — schikking: "+ARR[S.arr].titel,""];
-  ["war","bul","eco","jan"].forEach(g=>{
-    const items=active().filter(s=>s.sup===g&&S.qty[s.id]>0);
-    if(!items.length)return;
-    lines.push(SUPS[g].naam+" ("+SUPS[g].sub+"):");
-    items.forEach(s=>lines.push(`  ${S.qty[s.id]} × ${s.lat} — ${eur(S.qty[s.id]*s.unit)}`));
-    lines.push("");
-  });
-  const z=zand();
-  lines.push(`Bouwhandel: ${z.zakken} zakken scherp zand (25 kg) — ${eur(z.prijs)}`,"",
-    `Totaal: ${c.bollen} bollen (${Math.round(c.dicht)}/m²) — ±${eur(c.prijs)}`,
-    `Planttijd geschat: ${Math.round(c.uren*2)/2} uur, ${c.gaten} plantgaten`);
-  return lines.join("\n");
-}
-document.getElementById("copy").onclick=async()=>{
-  const t=orderText();
-  try{await navigator.clipboard.writeText(t);}
-  catch(e){
-    const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);
-    ta.select();document.execCommand("copy");ta.remove();
-  }
-  const toast=document.getElementById("toast");
-  toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1600);
-};
-document.getElementById("reset-qty").onclick=()=>{vulAdviesVoor(S.arr);save();refresh();};
-document.getElementById("leeg-lijst").onclick=()=>{SPECIES.forEach(s=>S.qty[s.id]=0);save();refresh();};
+document.getElementById("clear-design").onclick=()=>{pushHist();S.gd={d:Array(COLS*ROWS).fill(null),o:Array(COLS*ROWS).fill(null)};save();paintGrid();renderDStats();renderBloeiInfo();if(S.arr==="vrij")refresh();};
 
 /* --- doorklikken naar bestellijst + mix-tuner --- */
 function vulAdviesVoor(k){
@@ -847,15 +822,47 @@ function vbStinzen(){
   }
   return{d,o};
 }
+function vbBijen(){
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c;
+    if(c<2){o[i]=r<4?"iri":"asp";continue;}
+    o[i]=["cro","era","mus","cro"][(i*3)%4];
+    if((r+c)%4===0)d[i]="aps";
+  }
+  for(let r=6;r<8;r++)for(let c=6;c<8;c++)d[r*COLS+c]="cam";
+  return{d,o};
+}
+function vbPWG(){
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c;
+    if(c<2){o[i]="iri";d[i]="tul";continue;}
+    o[i]=["cro","gal","era","cro","bos"][(i*7)%5];
+    if((r+c)%3===0)d[i]="nar";
+    else if((i*11)%9===0)d[i]="aps";
+  }
+  return{d,o};
+}
+function vbVerwild(){
+  const d=Array(COLS*ROWS).fill(null),o=Array(COLS*ROWS).fill(null);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c;
+    o[i]=["cro","gal","era","mus","cro","bos","gal"][(i*5)%7];
+    if((r+c)%3===1)d[i]="nar";
+  }
+  for(let r=6;r<8;r++)for(let c=6;c<8;c++)d[r*COLS+c]="cam";
+  return{d,o};
+}
 function renderVB(){
   const w=document.getElementById("vbrow");if(!w)return;w.innerHTML="";
-  [["stroken","Stroken",vbStroken],["drifts","Drifts",vbDrifts],["stinzen","Stinzenweide",vbStinzen]].forEach(([k,lbl,fn])=>{
+  [["stroken","Stroken",vbStroken],["drifts","Drifts",vbDrifts],["stinzen","Stinzenweide",vbStinzen],["bijen","Bijenmix",vbBijen],["pwg","Paars-wit-geel",vbPWG],["verwild","Verwildering",vbVerwild]].forEach(([k,lbl,fn])=>{
     const b=document.createElement("button");
     b.textContent=lbl;
     b.onclick=()=>{
       const vol=S.gd.d.some(Boolean)||S.gd.o.some(Boolean);
       if(vol&&!confirm("Dit overschrijft je huidige tekening. Doorgaan? (Tip: bewaar ze eerst hieronder.)"))return;
-      S.gd=fn();save();paintGrid();renderDStats();renderBloeiInfo();
+      pushHist();S.gd=fn();save();paintGrid();renderDStats();renderBloeiInfo();
       if(S.arr==="vrij"){renderCheck();renderCards();}
       melding("Voorbeeld "+lbl.toLowerCase()+" geladen");
     };
@@ -939,7 +946,7 @@ async function load(){
       delete S.grid;}
   }catch(e){}
 }
-(async()=>{await load();buildGrid();renderScrub();renderLaagview();renderVB();refresh();renderSaves();})();
+(async()=>{await load();buildGrid();renderScrub();renderLaagview();renderSize();renderTool();renderVB();refresh();renderSaves();})();
 </script>
 </body>
 </html>
