@@ -76,6 +76,15 @@ details li b{color:var(--chalk)}
 .scrub button.on{background:var(--geel);color:#241C08;border-color:var(--geel);font-weight:600}
 .bloei-info{font-size:12.5px;color:var(--chalk-dim);margin:4px 2px 0;min-height:18px}
 .pal small{color:var(--chalk-mut);font-weight:400;font-size:10.5px}
+.pal-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-mut);margin:8px 2px 4px}
+.binfo{font-size:12.5px;color:var(--chalk);background:var(--soil-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 10px;min-height:20px}
+.bp{display:flex;gap:4px;align-items:flex-end;height:64px;margin:8px 0 2px}
+.bpb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:0}
+.bpb i{display:block;background:var(--groen);border-radius:3px 3px 0 0;width:100%;min-height:2px}
+.bpb.on i{background:var(--geel)}
+.bp-lbl{display:flex;gap:4px;font-size:10.5px;color:var(--chalk-mut);text-align:center;margin-bottom:6px}
+.bp-lbl span{flex:1}
+.ov-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-mut);padding:8px 0 2px}
 /* kalender */
 .cal{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px}
 .cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
@@ -165,7 +174,12 @@ details li b{color:var(--chalk)}
 
 <section class="pane" id="pane-ontwerp">
   <h2>Vrij ontwerp<small>elke cel is 50 × 50 cm · twee lagen</small></h2>
-  <div class="palette" id="palette"></div>
+  <div class="pal-h">Dieplaag · 12–15 cm · komt onderin de cel</div>
+  <div class="palette" id="palette-d"></div>
+  <div class="pal-h">Bovenlaag · 5–10 cm · komt bovenop</div>
+  <div class="palette" id="palette-o"></div>
+  <div class="binfo" id="binfo"></div>
+  <div class="scrub" id="laagview"></div>
   <div class="gridbox">
     <div class="gridlbl"><span>← west (avondzon)</span><span>oost →</span></div>
     <div id="grid"></div>
@@ -175,7 +189,7 @@ details li b{color:var(--chalk)}
   <div class="design-stats check" id="dstats" style="margin-top:14px;padding:10px 14px"></div>
   <button class="btn" id="apply-design">Neem ontwerp over in bestellijst</button>
   <button class="btn ghost" id="clear-design">Ontwerp wissen</button>
-  <div class="hint">Alle soorten — ook de alternatieven — staan in het palet; teken je een alternatief, dan komt het vanzelf in het plan. Diepe soorten (≥ 12 cm: tulp, narcis, sierui, camassia, dichtersnarcis, honinglook) en ondiepe liggen in twee lagen: krokus óver tulpen tekenen mag dus (lasagne), de cel kleurt dan tweeledig. Tik een maand boven de statistieken om te zien wat er dan bloeit. "Overnemen" zet de advies-aantallen (geverfde m² × dichtheid) in de bestellijst.</div>
+  <div class="hint">Het palet is verdeeld in twee lagen: dieplaagsoorten komen onderin de plantsleuf, bovenlaagsoorten erbovenop — één cel kan er één van elk hebben (lasagne) en kleurt dan onder/boven gesplitst. Teken je een alternatief, dan komt het vanzelf in het plan. Kies een maand om het palet te beperken tot wat dan bloeit én het raster als bloeibeeld te zien; met de laagknoppen bekijk je één laag apart. "Overnemen" zet de advies-aantallen (geverfde m² × dichtheid) in de bestellijst.</div>
 </section>
 
 <section class="pane" id="pane-soorten">
@@ -388,24 +402,47 @@ function renderCal(){
 }
 
 /* --- ontwerp --- */
-let brush=null,maandSel=0,altToegevoegd=false;
+let brush=null,maandSel=0,laagSel="beide",altToegevoegd=false;
 const MND=["alle","jan","feb","mrt","apr","mei","jun","jul"];
 const laagVan=s=>s.diep>=12?"d":"o";
+function plantWanneer(s){
+  if(s.id==="gal")return"planten jan–feb, in het groen";
+  if(s.id==="tul"||s.id==="tcl")return"planten in november";
+  return"planten in sep–okt";
+}
+function zetMaand(md){maandSel=md;renderScrub();renderPalette();paintGrid();renderBloeiInfo();renderDStats();}
 function renderPalette(){
-  const w=document.getElementById("palette");w.innerHTML="";
-  SPECIES.forEach(s=>{
-    const b=document.createElement("button");
-    b.className="pal"+(brush===s.id?" on":"");
-    const b1=MND[s.bloei[0]],b2=MND[s.bloei[s.bloei.length-1]];
-    b.innerHTML=`<i style="background:${s.hex}"></i>${s.naam} <small>${b1===b2?b1:b1+"–"+b2}</small>`;
-    b.onclick=()=>{brush=s.id;renderPalette();};
-    w.appendChild(b);
+  const pas=s=>maandSel===0||s.bloei.includes(maandSel);
+  const zichtbaar=SPECIES.filter(pas).map(s=>s.id);
+  if(brush&&!zichtbaar.includes(brush))brush=null;
+  [["palette-d","d"],["palette-o","o"]].forEach(([el,laag])=>{
+    const w=document.getElementById(el);w.innerHTML="";
+    SPECIES.filter(s=>laagVan(s)===laag&&pas(s)).forEach(s=>{
+      const b=document.createElement("button");
+      b.className="pal"+(brush===s.id?" on":"");
+      const b1=MND[s.bloei[0]],b2=MND[s.bloei[s.bloei.length-1]];
+      b.innerHTML=`<i style="background:${s.hex}"></i>${s.naam} <small>${b1===b2?b1:b1+"–"+b2}</small>`;
+      b.onclick=()=>{brush=s.id;renderPalette();};
+      w.appendChild(b);
+    });
+    if(laag==="o"){
+      const e=document.createElement("button");
+      e.className="pal"+(brush===null?" on":"");
+      e.innerHTML=`<i style="background:var(--soil-3)"></i>Gum`;
+      e.onclick=()=>{brush=null;renderPalette();};
+      w.appendChild(e);
+    }
   });
-  const e=document.createElement("button");
-  e.className="pal"+(brush===null?" on":"");
-  e.innerHTML=`<i style="background:var(--soil-3)"></i>Gum`;
-  e.onclick=()=>{brush=null;renderPalette();};
-  w.appendChild(e);
+  renderBinfo();
+}
+function renderBinfo(){
+  const w=document.getElementById("binfo");if(!w)return;
+  if(!brush){
+    w.textContent=maandSel?`Palet beperkt tot bloeiers in ${MND[maandSel]} — tik "alle" voor het volledige palet. Gum wist beide lagen.`:"Kies een soort: dieplaagsoorten komen onderin de cel, bovenlaagsoorten bovenop. Gum wist beide lagen.";
+    return;
+  }
+  const s=sp(brush);
+  w.innerHTML=`<b>${s.naam}</b> · ${laagVan(s)==="d"?"dieplaag":"bovenlaag"} · ${s.diep} cm diep · ${s.afst} cm tussen · advies ${s.dens}/m² · ${plantWanneer(s)}${s.note?" · "+s.note:""}`;
 }
 function renderScrub(){
   const w=document.getElementById("scrub");w.innerHTML="";
@@ -413,20 +450,32 @@ function renderScrub(){
     const b=document.createElement("button");
     if(maandSel===ix)b.className="on";
     b.textContent=m;
-    b.onclick=()=>{maandSel=ix;renderScrub();paintGrid();renderBloeiInfo();};
+    b.onclick=()=>zetMaand(ix);
+    w.appendChild(b);
+  });
+}
+function renderLaagview(){
+  const w=document.getElementById("laagview");w.innerHTML="";
+  [["beide","beide lagen"],["diep","alleen dieplaag"],["boven","alleen bovenlaag"]].forEach(([k,lbl])=>{
+    const b=document.createElement("button");
+    if(laagSel===k)b.className="on";
+    b.textContent=lbl;
+    b.onclick=()=>{laagSel=k;renderLaagview();paintGrid();};
     w.appendChild(b);
   });
 }
 function celIds(i){return[S.gd.d[i],S.gd.o[i]].filter(Boolean);}
 function styleCell(el){
-  const i=+el.dataset.i,ids=celIds(i);
-  if(!ids.length){el.style.background="";return;}
+  const i=+el.dataset.i;
+  const d=laagSel!=="boven"?S.gd.d[i]:null;
+  const o=laagSel!=="diep"?S.gd.o[i]:null;
+  if(!d&&!o){el.style.background="";return;}
   const col=id=>{
     const s=sp(id);
     return (maandSel===0||s.bloei.includes(maandSel))?s.hex:s.hex+"30";
   };
-  if(ids.length===1)el.style.background=col(ids[0]);
-  else el.style.background=`linear-gradient(135deg,${col(S.gd.d[i])} 50%,${col(S.gd.o[i])} 50%)`;
+  if(d&&o)el.style.background=`linear-gradient(180deg,${col(o)} 0 50%,${col(d)} 50% 100%)`;
+  else el.style.background=col(d||o);
 }
 function paintGrid(){document.querySelectorAll("#grid .cell").forEach(styleCell);}
 function renderBloeiInfo(){
@@ -475,14 +524,40 @@ function buildGrid(){
 function renderDStats(){
   const w=document.getElementById("dstats");w.innerHTML="";
   let tot=0;for(let i=0;i<COLS*ROWS;i++)if(celIds(i).length)tot+=CELL;
+  if(!tot){
+    w.innerHTML='<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Kies een soort en veeg over het raster. Diep en boven mogen over elkaar (lasagne).</span></div>';
+    return;
+  }
+  /* bloeiprofiel jan–jul */
+  let bars='<div class="ov-h">Bloeiprofiel — aandeel van je tekening in bloei</div><div class="bp">';
+  let lbls='<div class="bp-lbl">';
+  for(let md=1;md<=7;md++){
+    let P=0,B=0;
+    for(let i=0;i<COLS*ROWS;i++){
+      const ids=celIds(i);if(!ids.length)continue;P++;
+      if(ids.some(id=>sp(id).bloei.includes(md)))B++;
+    }
+    const pct=P?Math.round(B/P*100):0;
+    bars+=`<button class="bpb${maandSel===md?" on":""}" data-md="${md}" title="${pct}%"><i style="height:${Math.max(3,pct)}%"></i></button>`;
+    lbls+=`<span>${MND[md]}</span>`;
+  }
+  bars+='</div>';lbls+='</div>';
+  /* overzicht per laag */
   let rows="";
-  active().forEach(s=>{
-    const m2=paintedM2(s.id);if(!m2)return;
-    const adv=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
-    rows+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${s.naam} <small style="color:var(--chalk-mut)">${laagVan(s)==="d"?"dieplaag":"ondiep"}</small></span><span>${m2} m² × ${s.dens}/m²</span><b>&nbsp;→ ${adv} st</b></div>`;
+  [["d","Onderin — dieplaag"],["o","Bovenop — bovenlaag"]].forEach(([laag,titel])=>{
+    const met=active().filter(s=>laagVan(s)===laag&&paintedM2(s.id)>0);
+    if(!met.length)return;
+    rows+=`<div class="ov-h">${titel}</div>`;
+    met.forEach(s=>{
+      const m2=paintedM2(s.id);
+      const adv=Math.max(s.step,Math.round(m2*s.dens/s.step)*s.step);
+      const b1=MND[s.bloei[0]],b2=MND[s.bloei[s.bloei.length-1]];
+      rows+=`<div class="ds-row"><i style="background:${s.hex}"></i><span class="n">${s.naam} <small style="color:var(--chalk-mut)">${b1===b2?b1:b1+"–"+b2}</small></span><span>${m2} m² × ${s.dens}/m²</span><b>&nbsp;→ ${adv} st</b></div>`;
+    });
   });
-  w.innerHTML=rows||'<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Kies een soort en veeg over het raster. Diep en ondiep mogen over elkaar (lasagne).</span></div>';
-  if(rows)w.innerHTML+=`<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Getekend: ${tot} van 24 m² grondvlak</span></div>`;
+  rows+=`<div class="ds-row"><span class="n" style="color:var(--chalk-mut)">Getekend: ${tot} van 24 m² grondvlak</span></div>`;
+  w.innerHTML=bars+lbls+rows;
+  w.querySelectorAll(".bpb").forEach(b=>b.onclick=()=>zetMaand(+b.dataset.md));
 }
 document.getElementById("apply-design").onclick=()=>{
   active().forEach(s=>{
@@ -668,7 +743,7 @@ async function load(){
       delete S.grid;}
   }catch(e){}
 }
-(async()=>{await load();buildGrid();renderScrub();refresh();})();
+(async()=>{await load();buildGrid();renderScrub();renderLaagview();refresh();})();
 </script>
 </body>
 </html>
