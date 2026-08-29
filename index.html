@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bollenveld Duffel · 6×4 m</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil:#1E1812; --soil-2:#2A2219; --soil-3:#3A2F22;
+  --chalk:#F2EADA; --chalk-dim:#B8AC97; --chalk-mut:#8A7F6C;
+  --line:#4A3D2C;
+  --paars:#9B7FE0; --geel:#EFC94C; --groen:#6FB98A; --wit:#E8E3D5; --blauw:#7FA8E0; --roze:#E08AAE; --oranje:#E0894C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--soil);color:var(--chalk);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.55;padding-bottom:56px}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+header{padding:26px 0 8px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-mut)}
+h1{font-family:Fraunces,serif;font-weight:600;font-size:30px;line-height:1.15;margin:6px 0 4px}
+.sub{color:var(--chalk-dim);font-size:14px}
+h2{font-family:Fraunces,serif;font-weight:600;font-size:20px;margin:24px 0 12px}
+/* nav */
+.nav{position:sticky;top:0;z-index:9;background:var(--soil);display:flex;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.nav button{flex:1;border:1px solid var(--line);background:var(--soil-2);color:var(--chalk-dim);border-radius:10px;padding:9px 0;font:inherit;font-size:13.5px;font-weight:500;cursor:pointer}
+.nav button.on{background:var(--chalk);color:var(--soil);border-color:var(--chalk)}
+/* schikking */
+.opt{border:1px solid var(--line);background:var(--soil-2);border-radius:14px;padding:14px;margin-bottom:12px;cursor:pointer}
+.opt.on{border-color:var(--groen);box-shadow:0 0 0 1px var(--groen)}
+.opt-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.opt h3{font-family:Fraunces,serif;font-weight:600;font-size:18px}
+.badge{font-size:11px;color:#12281A;background:var(--groen);border-radius:999px;padding:3px 10px;font-weight:600;white-space:nowrap}
+.opt-body{display:flex;gap:14px;margin-top:10px}
+.opt svg{width:120px;height:84px;flex:none;border-radius:8px;background:var(--soil-3)}
+.opt ul{list-style:none;font-size:12.5px;color:var(--chalk-dim)}
+.opt li{margin-bottom:3px}
+.opt li b{color:var(--chalk)}
+/* kalender */
+.cal{background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px}
+.cal-months{display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;color:var(--chalk-mut);margin:0 0 8px 104px;text-align:center}
+.cal-row{display:flex;align-items:center;margin-bottom:7px}
+.cal-name{width:104px;flex:none;font-size:12px;color:var(--chalk-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.cal-track{flex:1;display:grid;grid-template-columns:repeat(7,1fr);height:12px;border-radius:6px;background:var(--soil-3)}
+.cal-bar{border-radius:6px;height:12px}
+/* cards */
+.card{display:flex;gap:14px;background:var(--soil-2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.ph{width:92px;height:92px;flex:none;border-radius:10px;overflow:hidden;background:var(--soil-3);display:flex;align-items:center;justify-content:center}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph svg{width:44px;height:44px}
+.card h3{font-family:Fraunces,serif;font-weight:600;font-size:17px;line-height:1.2}
+.lat{font-size:12px;font-style:italic;color:var(--chalk-mut)}
+.plek{font-size:12.5px;color:var(--groen);margin-top:3px}
+.meta{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12.5px;color:var(--chalk-dim);margin:7px 0 9px}
+.meta b{color:var(--chalk);font-weight:600}
+.chips{display:flex;gap:8px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--chalk-dim);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;cursor:pointer;font:inherit}
+.chip.on{background:var(--groen);border-color:var(--groen);color:#12281A}
+.note{font-size:12.5px;color:var(--oranje);margin-top:8px}
+/* bestellijst */
+.order-row{display:flex;align-items:center;gap:10px;background:var(--soil-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.order-row.done{opacity:.45}
+.order-check{width:22px;height:22px;flex:none;border:1.5px solid var(--chalk-mut);border-radius:6px;background:transparent;cursor:pointer;color:#12281A;font-size:14px;line-height:1;font-weight:700}
+.order-row.done .order-check{background:var(--groen);border-color:var(--groen)}
+.order-info{flex:1;min-width:0}
+.order-info b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-info span{font-size:12px;color:var(--chalk-mut)}
+.stepper{display:flex;align-items:center;gap:0;flex:none}
+.stepper button{width:32px;height:32px;border:1px solid var(--line);background:var(--soil-3);color:var(--chalk);font-size:17px;cursor:pointer}
+.stepper button:first-child{border-radius:8px 0 0 8px}
+.stepper button:last-child{border-radius:0 8px 8px 0}
+.stepper .qty{width:48px;height:32px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;background:var(--soil-2)}
+.order-price{width:52px;text-align:right;font-size:13.5px;font-weight:600;flex:none}
+.totals{display:flex;justify-content:space-between;align-items:center;background:var(--soil-3);border-radius:12px;padding:14px;margin:14px 0}
+.totals b{font-family:Fraunces,serif;font-size:20px;font-weight:600}
+.totals span{font-size:12px;color:var(--chalk-dim);display:block}
+.btn{width:100%;border:none;background:var(--chalk);color:var(--soil);border-radius:12px;padding:13px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--chalk-dim);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--groen);color:#12281A;font-size:13.5px;font-weight:600;border-radius:999px;padding:9px 18px;opacity:0;pointer-events:none}
+.toast.show{opacity:1}
+.hint{font-size:12.5px;color:var(--chalk-mut);margin-top:10px}
+.pane{display:none}.pane.on{display:block}
+@media (prefers-reduced-motion:no-preference){.chip,.nav button,.toast{transition:all .18s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Duffel · zandleem · avondzon vanaf 15u</div>
+  <h1>Het bollenveld</h1>
+  <div class="sub">6 × 4 m · bloei januari tot juli</div>
+</header>
+
+<nav class="nav">
+  <button class="on" data-p="plan">Schikking</button>
+  <button data-p="soorten">Soorten</button>
+  <button data-p="bestel">Bestellijst</button>
+</nav>
+
+<section class="pane on" id="pane-plan">
+  <h2>Kies je schikking</h2>
+  <div id="opts"></div>
+  <h2>Bloeikalender</h2>
+  <div class="cal" id="cal">
+    <div class="cal-months"><span>jan</span><span>feb</span><span>mrt</span><span>apr</span><span>mei</span><span>jun</span><span>jul</span></div>
+  </div>
+</section>
+
+<section class="pane" id="pane-soorten">
+  <h2>Alle soorten</h2>
+  <div class="hint" id="soorten-hint" style="margin:-4px 0 14px"></div>
+  <div id="cards"></div>
+</section>
+
+<section class="pane" id="pane-bestel">
+  <h2>Bestellijst</h2>
+  <div id="order"></div>
+  <div class="totals">
+    <div><b id="tot-bollen">0</b><span>bollen</span></div>
+    <div style="text-align:right"><b id="tot-prijs">€0</b><span>richtprijs, ±15%</span></div>
+  </div>
+  <button class="btn" id="copy">Kopieer bestellijst</button>
+  <button class="btn ghost" id="reset-qty">Zet aantallen terug op advies</button>
+  <div class="hint">Vink af wat besteld is. Sneeuwklokjes bestel je apart in januari–februari als "in the green"; de rest nu voor levering in september. Aantallen per soort aanpasbaar — prijzen rekenen automatisch mee.</div>
+</section>
+
+</div>
+<div class="toast" id="toast">Gekopieerd</div>
+
+<script>
+const SPECIES=[
+ {id:"gal",naam:"Sneeuwklokje",lat:"Galanthus nivalis",wiki:"Galanthus_nivalis",n:300,unit:0.235,step:50,bloei:[1,2],diep:8,afst:8,kleur:"var(--wit)",bestelnote:"in the green, feb",note:"Kopen als 'in the green' in februari — droge bollen slaan slecht aan."},
+ {id:"era",naam:"Winterakoniet",lat:"Eranthis hyemalis",wiki:"Eranthis_hyemalis",n:150,unit:0.235,step:50,bloei:[1,2,3],diep:5,afst:8,kleur:"var(--geel)",note:"Knolletjes 24u voorweken vóór het planten."},
+ {id:"cro",naam:"Boerenkrokus",lat:"Crocus tommasinianus",wiki:"Crocus_tommasinianus",n:400,unit:0.14,step:50,bloei:[2,3],diep:8,afst:8,kleur:"var(--paars)"},
+ {id:"iri",naam:"Netiris",lat:"Iris reticulata",wiki:"Iris_reticulata",n:100,unit:0.18,step:25,bloei:[2,3],diep:9,afst:10,kleur:"var(--blauw)",note:"Droogste plek, scherp zand eronder."},
+ {id:"nar",naam:"Narcis",lat:"Narcissus, vroeg + laat",wiki:"Narcissus_(plant)",n:200,unit:0.33,step:50,bloei:[3,4],diep:14,afst:12,kleur:"var(--geel)"},
+ {id:"mus",naam:"Blauwe druifjes",lat:"Muscari armeniacum",wiki:"Muscari_armeniacum",n:250,unit:0.12,step:50,bloei:[4,5],diep:8,afst:8,kleur:"var(--blauw)"},
+ {id:"tul",naam:"Tulp",lat:"Tulipa, vroeg/Triumph/laat",wiki:"Tulip",n:250,unit:0.32,step:50,bloei:[4,5],diep:14,afst:12,kleur:"var(--roze)",note:"Scherp zand onder de bol; komt in zandleem 2–3 jaar terug."},
+ {id:"bos",naam:"Boshyacint",lat:"Hyacinthoides non-scripta",wiki:"Hyacinthoides_non-scripta",n:150,unit:0.34,step:25,bloei:[4,5],diep:10,afst:10,kleur:"var(--paars)"},
+ {id:"aps",naam:"Sierui",lat:"Allium 'Purple Sensation'",wiki:"Allium_hollandicum",n:80,unit:0.56,step:10,bloei:[5,6],diep:12,afst:20,kleur:"var(--paars)"},
+ {id:"cam",naam:"Camassia",lat:"Camassia leichtlinii",wiki:"Camassia",n:60,unit:0.92,step:10,bloei:[5,6],diep:12,afst:20,kleur:"var(--blauw)",note:"In het laagste, natste punt — verdraagt dat als enige."},
+ {id:"asp",naam:"Trommelstokjes",lat:"Allium sphaerocephalon",wiki:"Allium_sphaerocephalon",n:100,unit:0.15,step:25,bloei:[6,7],diep:8,afst:8,kleur:"var(--roze)"}
+];
+const EXTRA={id:"zand",naam:"Scherp zand",sub:"3–4 zakken, onder tulp en iris",prijs:15};
+
+const ARR={
+ stroken:{
+  titel:"Stroken",
+  pro:[["Planten","<b>makkelijkst</b> — soort per soort"],["Beeld","strak, duidelijke golven"],["Onderhoud","gericht maaien per strook"]],
+  plek:{gal:"strook D (oost)",era:"strook D (oost)",cro:"strook C + onderlaag A/B",iri:"strook A (west, droog)",nar:"strook B",mus:"strook C",tul:"strook A (west, droog)",bos:"strook D (oost)",aps:"strook B",cam:"strook C, natste punt",asp:"strook A (west)"}
+ },
+ drifts:{
+  titel:"Drifts",
+  pro:[["Planten","gemiddeld — vlekken uitzetten"],["Beeld","<b>natuurlijkst</b>, golvende eilanden"],["Onderhoud","maaien rond de vlekken"]],
+  plek:{gal:"3 vlekken langs oostrand",era:"tussen de sneeuwklokjes",cro:"matrix door het hele veld",iri:"droge westpunt",nar:"2 grote drifts in het midden",mus:"linten tussen de drifts",tul:"band langs westrand",bos:"oosthoeken",aps:"verspreid door het midden",cam:"natste kom",asp:"westrand, tussen de tulpen"}
+ },
+ stinzen:{
+  titel:"Stinzenweide",
+  pro:[["Planten","<b>minste werk</b> — strooien en planten waar ze vallen"],["Beeld","gemengd tapijt, elk jaar wilder"],["Onderhoud","één keer maaien, half juni"]],
+  plek:{gal:"gemengd uitstrooien",era:"gemengd uitstrooien",cro:"gemengd uitstrooien",iri:"apart: droge westrand",nar:"gemengd uitstrooien",mus:"gemengd uitstrooien",tul:"apart: droge westrand",bos:"gemengd, iets meer oost",aps:"gemengd uitstrooien",cam:"apart: natste kom",asp:"apart: droge westrand"}
+ }
+};
+const PREV={
+ stroken:`<svg viewBox="0 0 120 84"><rect x="8" y="8" width="24" height="68" rx="4" fill="var(--roze)" opacity=".8"/><rect x="36" y="8" width="24" height="68" rx="4" fill="var(--geel)" opacity=".8"/><rect x="64" y="8" width="24" height="68" rx="4" fill="var(--blauw)" opacity=".8"/><rect x="92" y="8" width="20" height="68" rx="4" fill="var(--paars)" opacity=".8"/></svg>`,
+ drifts:`<svg viewBox="0 0 120 84"><rect x="8" y="8" width="14" height="68" rx="4" fill="var(--roze)" opacity=".8"/><ellipse cx="52" cy="30" rx="20" ry="13" fill="var(--geel)" opacity=".8"/><ellipse cx="72" cy="58" rx="22" ry="13" fill="var(--geel)" opacity=".6"/><ellipse cx="100" cy="24" rx="13" ry="10" fill="var(--wit)" opacity=".85"/><ellipse cx="103" cy="62" rx="12" ry="10" fill="var(--paars)" opacity=".8"/><ellipse cx="38" cy="62" rx="13" ry="9" fill="var(--blauw)" opacity=".8"/></svg>`,
+ stinzen:`<svg viewBox="0 0 120 84"><rect x="8" y="8" width="12" height="68" rx="4" fill="var(--roze)" opacity=".8"/><g opacity=".9"><circle cx="34" cy="18" r="3" fill="var(--geel)"/><circle cx="52" cy="26" r="3" fill="var(--paars)"/><circle cx="70" cy="15" r="3" fill="var(--wit)"/><circle cx="90" cy="24" r="3" fill="var(--blauw)"/><circle cx="106" cy="14" r="3" fill="var(--paars)"/><circle cx="40" cy="42" r="3" fill="var(--blauw)"/><circle cx="60" cy="50" r="3" fill="var(--geel)"/><circle cx="80" cy="40" r="3" fill="var(--paars)"/><circle cx="100" cy="48" r="3" fill="var(--wit)"/><circle cx="30" cy="66" r="3" fill="var(--paars)"/><circle cx="52" cy="70" r="3" fill="var(--wit)"/><circle cx="74" cy="64" r="3" fill="var(--blauw)"/><circle cx="94" cy="70" r="3" fill="var(--geel)"/></g></svg>`
+};
+
+const KEY="bollenveld-v2";
+let S={arr:"stroken",qty:{},done:{},st:{}};
+SPECIES.forEach(s=>S.qty[s.id]=s.n);
+const eur=v=>"€"+Math.round(v);
+
+/* nav */
+document.querySelectorAll(".nav button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on"));
+    document.querySelectorAll(".pane").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    document.getElementById("pane-"+b.dataset.p).classList.add("on");
+  };
+});
+
+/* schikkingen */
+function renderOpts(){
+  const w=document.getElementById("opts");w.innerHTML="";
+  Object.entries(ARR).forEach(([k,a])=>{
+    const d=document.createElement("div");
+    d.className="opt"+(S.arr===k?" on":"");
+    d.innerHTML=`<div class="opt-head"><h3>${a.titel}</h3>${S.arr===k?'<span class="badge">gekozen</span>':""}</div>
+      <div class="opt-body">${PREV[k]}<ul>${a.pro.map(p=>`<li>${p[0]}: ${p[1]}</li>`).join("")}</ul></div>`;
+    d.onclick=()=>{S.arr=k;save();renderOpts();renderCards();};
+    w.appendChild(d);
+  });
+}
+
+/* kalender */
+const cal=document.getElementById("cal");
+SPECIES.forEach(s=>{
+  const row=document.createElement("div");row.className="cal-row";
+  row.innerHTML=`<div class="cal-name">${s.naam}</div><div class="cal-track"><div class="cal-bar" style="grid-column:${s.bloei[0]} / ${s.bloei[s.bloei.length-1]+1};background:${s.kleur}"></div></div>`;
+  cal.appendChild(row);
+});
+
+/* soorten */
+function placeholder(k){return `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="${k}"/><circle cx="15" cy="24" r="6" fill="${k}" opacity=".7"/><circle cx="33" cy="24" r="6" fill="${k}" opacity=".7"/><rect x="22.5" y="26" width="3" height="16" rx="1.5" fill="#6FB98A"/></svg>`;}
+async function foto(s,el){
+  for(const w of ["nl","en"]){
+    try{
+      const r=await fetch(`https://${w}.wikipedia.org/api/rest_v1/page/summary/`+encodeURIComponent(s.wiki));
+      if(!r.ok)continue;
+      const d=await r.json();
+      if(d.thumbnail&&d.thumbnail.source){
+        const img=new Image();img.alt=s.naam;img.loading="lazy";
+        img.onload=()=>{el.innerHTML="";el.appendChild(img);};
+        img.src=d.thumbnail.source.replace(/\/\d+px-/,"/320px-");
+        return;
+      }
+    }catch(e){}
+  }
+}
+function renderCards(){
+  document.getElementById("soorten-hint").textContent="Plek volgens gekozen schikking: "+ARR[S.arr].titel.toLowerCase()+".";
+  const w=document.getElementById("cards");w.innerHTML="";
+  SPECIES.forEach(s=>{
+    const st=S.st[s.id]||{};
+    const c=document.createElement("div");c.className="card";
+    c.innerHTML=`<div class="ph" id="ph-${s.id}">${placeholder(s.kleur)}</div>
+      <div style="flex:1;min-width:0">
+        <h3>${s.naam}</h3><div class="lat">${s.lat}</div>
+        <div class="plek">→ ${ARR[S.arr].plek[s.id]}</div>
+        <div class="meta"><span><b>${S.qty[s.id]}</b> st</span><span><b>${s.diep}</b> cm diep</span><span><b>${s.afst}</b> cm tussen</span></div>
+        <div class="chips"><button class="chip ${st.planted?"on":""}" data-id="${s.id}">${st.planted?"✓ geplant":"geplant"}</button></div>
+        ${s.note?`<div class="note">${s.note}</div>`:""}
+      </div>`;
+    w.appendChild(c);
+    foto(s,c.querySelector("#ph-"+s.id));
+  });
+  w.querySelectorAll(".chip").forEach(c=>{
+    c.onclick=()=>{
+      const id=c.dataset.id;S.st[id]=S.st[id]||{};S.st[id].planted=!S.st[id].planted;
+      c.classList.toggle("on",S.st[id].planted);
+      c.textContent=(S.st[id].planted?"✓ ":"")+"geplant";
+      save();
+    };
+  });
+}
+
+/* bestellijst */
+function renderOrder(){
+  const w=document.getElementById("order");w.innerHTML="";
+  SPECIES.forEach(s=>{
+    const row=document.createElement("div");
+    row.className="order-row"+(S.done[s.id]?" done":"");
+    row.innerHTML=`<button class="order-check" aria-label="besteld">${S.done[s.id]?"✓":""}</button>
+      <div class="order-info"><b>${s.naam}</b><span>${s.bestelnote||s.lat}</span></div>
+      <div class="stepper"><button aria-label="minder">−</button><div class="qty">${S.qty[s.id]}</div><button aria-label="meer">+</button></div>
+      <div class="order-price">${eur(S.qty[s.id]*s.unit)}</div>`;
+    const [check]=row.querySelectorAll(".order-check");
+    const [minus,plus]=row.querySelectorAll(".stepper button");
+    check.onclick=()=>{S.done[s.id]=!S.done[s.id];save();renderOrder();};
+    minus.onclick=()=>{S.qty[s.id]=Math.max(0,S.qty[s.id]-s.step);save();renderOrder();renderCards();};
+    plus.onclick=()=>{S.qty[s.id]=S.qty[s.id]+s.step;save();renderOrder();renderCards();};
+    w.appendChild(row);
+  });
+  const z=document.createElement("div");
+  z.className="order-row"+(S.done.zand?" done":"");
+  z.innerHTML=`<button class="order-check">${S.done.zand?"✓":""}</button>
+    <div class="order-info"><b>${EXTRA.naam}</b><span>${EXTRA.sub}</span></div>
+    <div class="order-price">${eur(EXTRA.prijs)}</div>`;
+  z.querySelector(".order-check").onclick=()=>{S.done.zand=!S.done.zand;save();renderOrder();};
+  w.appendChild(z);
+  const bollen=SPECIES.reduce((a,s)=>a+S.qty[s.id],0);
+  const prijs=SPECIES.reduce((a,s)=>a+S.qty[s.id]*s.unit,0)+EXTRA.prijs;
+  document.getElementById("tot-bollen").textContent=bollen.toLocaleString("nl-BE");
+  document.getElementById("tot-prijs").textContent=eur(prijs);
+}
+function orderText(){
+  const lines=["Bestellijst bollenveld 6×4 m (Duffel)","Schikking: "+ARR[S.arr].titel,""];
+  SPECIES.forEach(s=>{
+    if(S.qty[s.id]>0)lines.push(`${S.qty[s.id]} × ${s.lat}${s.bestelnote?" ("+s.bestelnote+")":""} — ${eur(S.qty[s.id]*s.unit)}`);
+  });
+  lines.push(`${EXTRA.naam}, ${EXTRA.sub} — ${eur(EXTRA.prijs)}`);
+  const bollen=SPECIES.reduce((a,s)=>a+S.qty[s.id],0);
+  const prijs=SPECIES.reduce((a,s)=>a+S.qty[s.id]*s.unit,0)+EXTRA.prijs;
+  lines.push("",`Totaal: ${bollen} bollen — ±${eur(prijs)}`);
+  return lines.join("\n");
+}
+document.getElementById("copy").onclick=async()=>{
+  const t=orderText();
+  try{await navigator.clipboard.writeText(t);}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");ta.remove();
+  }
+  const toast=document.getElementById("toast");
+  toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1600);
+};
+document.getElementById("reset-qty").onclick=()=>{
+  SPECIES.forEach(s=>S.qty[s.id]=s.n);save();renderOrder();renderCards();
+};
+
+/* storage */
+async function save(){
+  try{if(window.storage)await window.storage.set(KEY,JSON.stringify(S));
+  else localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+}
+async function load(){
+  try{
+    let v=null;
+    if(window.storage){const r=await window.storage.get(KEY);v=r&&r.value;}
+    else v=localStorage.getItem(KEY);
+    if(v){const p=JSON.parse(v);S={...S,...p,qty:{...S.qty,...p.qty}};}
+  }catch(e){}
+}
+(async()=>{await load();renderOpts();renderCards();renderOrder();})();
+</script>
+</body>
+</html>
